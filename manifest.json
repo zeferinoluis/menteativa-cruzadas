@@ -1,32 +1,39 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
   "name": "Palavras Cruzadas — Estímulo Mental",
-  "orientation": "any",
-  "scope": "/",
   "short_name": "Cruzadas",
-  "start_url": "/index.html",
+  "description": "Desafios de palavras cruzadas em português de Portugal para manter a mente ativa. Funciona offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F6F0E4",
   "theme_color": "#C2702C",
+  "lang": "pt-PT",
+  "categories": ["games"],
   "icons": [
     {
-      "src": "https://zeferinoluis.github.io/menteativa-cruzadas/icon-192.png",
+      "src": "./icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "sizes": "1254x1254",
-      "isSquare": true,
-      "isPng": true,
-      "isWebp": false,
-      "isJpg": false,
-      "width": 1254,
-      "is512x512": false,
-      "is256x256": false,
-      "is192x192": false
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ],
-  "id": "com.zeferinoluis.menteativacruzadas",
-  "description": "Desafios de palavras cruzadas em português de Portugal para manter a mente ativa. Funciona offline.",
-  "categories": [
-    "games"
-  ],
-  "lang": "pt"
+  ]
 }
