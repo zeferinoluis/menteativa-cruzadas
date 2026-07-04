@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Palavras Cruzadas — Mente Ativa</title>
+
+<!-- ═══ PWA ═══ -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#C2702C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cruzadas Mente Ativa">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<!-- ═══════════ -->
+<style>
+:root{
+  --papel:        #F6F0E4;
+  --papel-alt:    #EFE6D3;
+  --tinta:        #2B2420;
+  --tinta-suave:  #5C5246;
+  --ambar:        #C2702C;
+  --ambar-dk:     #9A551E;
+  --ambar-pale:   #F0DCBE;
+  --verde:        #4C6B4F;
+  --verde-pale:   #DCE6D7;
+  --terra:        #B5503F;
+  --terra-pale:   #F1DCD5;
+  --linha:        #DDD0B8;
+  --branco:       #FFFDF8;
+  --sombra:       rgba(43, 36, 32, 0.12);
+  --sombra-forte: rgba(43, 36, 32, 0.22);
+  --raio:         18px;
+  --raio-peq:     10px;
+}
+
+*{ box-sizing: border-box; }
+html, body{
+  margin:0; padding:0; min-height:100%;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: 'Iowan Old Style', 'Palatino Linotype', 'Charter', Georgia, 'Times New Roman', serif;
+}
+
+.f-display{ font-family: 'Iowan Old Style', Georgia, 'Palatino Linotype', serif; font-weight:700; letter-spacing:-0.01em; }
+.f-corpo{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+button, select, input{ font-family: inherit; }
+
+.textura-fundo{
+  position: fixed; inset:0; z-index:-1; pointer-events:none;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(194,112,44,0.07), transparent 38%),
+    radial-gradient(circle at 82% 78%, rgba(76,107,79,0.06), transparent 42%);
+}
+
+.app-header{
+  position: sticky; top:0; z-index: 50;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding: 14px 22px;
+  background: var(--papel);
+  border-bottom: 2px solid var(--linha);
+}
+.marca{
+  display:flex; align-items:center; gap:12px;
+  cursor:pointer; user-select:none;
+}
+.marca-selo{
+  width:42px; height:42px; border-radius:50%;
+  background: linear-gradient(155deg, var(--ambar), var(--ambar-dk));
+  display:flex; align-items:center; justify-content:center;
+  font-size: 22px; color: var(--branco);
+  box-shadow: 0 3px 0 var(--ambar-dk), 0 4px 10px var(--sombra);
+  flex-shrink:0;
+}
+.marca-texto h1{ font-size: 20px; margin:0; line-height:1.1; }
+.marca-texto p{ margin:0; font-size:12px; color: var(--tinta-suave); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+.btn{
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px; font-weight:600; padding: 10px 16px; border-radius: 999px;
+  border: 2px solid var(--linha); background: var(--branco); color: var(--tinta);
+  cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+  transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
+  white-space:nowrap; -webkit-tap-highlight-color: transparent;
+}
+.btn:hover:not(:disabled){ background: var(--papel-alt); }
+.btn:active:not(:disabled){ transform: scale(.96); }
+.btn.btn-primario{ background: var(--ambar); border-color: var(--ambar-dk); color: var(--branco); }
+.btn.btn-primario:hover:not(:disabled){ background: var(--ambar-dk); }
+.btn.btn-perigo{ background: var(--terra-pale); border-color: var(--terra); color: var(--terra); }
+.btn.btn-perigo:hover:not(:disabled){ background: var(--terra); color: var(--branco); }
+.btn.btn-fantasma{ background: transparent; border-color: transparent; color: var(--tinta-suave); padding:8px 12px; }
+.btn.btn-fantasma:hover:not(:disabled){ background: var(--papel-alt); color: var(--tinta); }
+
+.ecra{ display:none; max-width:1120px; margin: 0 auto; padding: 24px 22px 60px; }
+.ecra.activo{ display:block; animation: surgir .25s ease; }
+@keyframes surgir{ from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform:none; } }
+
+.grid-temas{
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 24px;
+}
+.cartao-tema{
+  background: var(--branco); border: 2px solid var(--linha); border-radius: var(--raio);
+  padding: 22px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:10px;
+  box-shadow: 0 2px 0 var(--linha); transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.cartao-tema:hover{ transform: translateY(-3px); box-shadow: 0 8px 20px var(--sombra); border-color: var(--ambar); }
+.cartao-selo{
+  width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:24px; color:var(--branco); background: linear-gradient(155deg, var(--ambar), var(--ambar-dk));
+}
+.cartao-tema h3{ margin: 4px 0 0 0; font-size: 19px; }
+.cartao-tema p{ font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size:13px; color: var(--tinta-suave); margin:0; line-height:1.45; flex:1; }
+.cartao-rodape{ font-family: -apple-system, BlinkMacSystemFont, sans-serif; display:flex; align-items:center; justify-content:space-between; font-size:12px; color: var(--tinta-suave); margin-top:4px; }
+.pill-progresso{ background: var(--papel-alt); border-radius:999px; padding:3px 10px; font-weight:600; color: var(--tinta); }
+
+.barra-jogo{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom: 20px; padding-bottom:14px; border-bottom: 2px solid var(--linha); }
+.barra-jogo .titulo-modulo{ display:flex; align-items:center; gap:12px; }
+.titulo-modulo h2{ font-size:22px; margin:0; }
+.titulo-modulo .sub{ font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size:13px; color:var(--tinta-suave); margin:2px 0 0; }
+
+.cx-layout{ display:flex; gap:28px; align-items:flex-start; }
+.cx-tabuleiro-wrap{ flex:0 0 auto; background: var(--tinta); padding: 2px; border-radius: 12px; box-shadow: 0 4px 20px var(--sombra-forte); }
+.cx-tabuleiro{ position:relative; display:inline-block; overflow:hidden; border-radius:10px; background: var(--tinta); }
+.cx-grelha{ display:grid; gap:1px; background: var(--tinta); }
+.cx-celula{ width:40px; height:40px; background: var(--branco); position:relative; }
+.cx-celula.bloco{ background: var(--tinta); }
+.cx-celula.palavra-activa{ background: var(--ambar-pale); }
+.cx-celula.letra-activa{ background: #E3C58E; }
+.cx-celula.certo{ background: var(--verde-pale) !important; }
+.cx-celula.errado{ background: var(--terra-pale) !important; }
+.cx-celula input{
+  position:absolute; inset:0; width:100%; height:100%; border:none; background:transparent;
+  text-align:center; font-size:19px; font-weight:700; color:var(--tinta); text-transform:uppercase;
+  outline:none; padding:0; caret-color:transparent;
+}
+.cx-celula .num{ position:absolute; top:2px; left:3px; font-size:9px; font-weight:700; color: var(--tinta-suave); line-height:1; pointer-events:none; }
+.cx-pausa-cobertura{ position:absolute; inset:0; background: rgba(246,240,228,0.98); display:none; flex-direction:column; align-items:center; justify-content:center; gap:12px; z-index:20; }
+.cx-pausa-cobertura.aberta{ display:flex; }
+
+.cx-pistas{ flex:1; min-width:260px; }
+.cx-grupo-pistas{ margin-bottom:22px; background: var(--branco); border: 2px solid var(--linha); border-radius: 12px; padding: 14px; max-height: 280px; overflow-y: auto; }
+.cx-grupo-titulo{ font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ambar-dk); margin-bottom:10px; padding-bottom:4px; border-bottom: 2px solid var(--papel-alt); }
+.cx-pista{ font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding:6px 8px; font-size:14px; border-radius:6px; cursor:pointer; color: var(--tinta); line-height:1.4; display:flex; gap:8px; align-items:flex-start; }
+.cx-pista:hover{ background: var(--papel); }
+.cx-pista.activa{ background: var(--ambar-pale); font-weight: 500; }
+.cx-pista.feita{ color: var(--tinta-suave); text-decoration: line-through; opacity:.5; }
+.cx-pista .num{ font-weight:700; color: var(--ambar-dk); min-width:18px; }
+
+.cx-barra-progresso-wrap{ height:6px; background: var(--linha); border-radius:999px; overflow:hidden; margin-bottom:16px; }
+.cx-barra-progresso-fill{ height:100%; background: var(--verde); width:0; transition: width .3s ease; }
+
+.modal-fundo{ position: fixed; inset:0; z-index: 200; background: rgba(43,36,32,0.55); display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-fundo.aberto{ display:flex; }
+.modal{ background: var(--branco); border-radius: var(--raio); padding: 26px; max-width: 440px; width:100%; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+.modal h3 { margin-top: 0; }
+.modal-acoes{ display:flex; gap:10px; justify-content:center; margin-top:18px; }
+.modal-acoes-col{ flex-direction:column; }
+.modal-acoes-col .btn { width: 100%; justify-content: center; }
+
+#toast{ position: fixed; bottom: 26px; left:50%; transform: translateX(-50%) translateY(90px); background: var(--tinta); color: var(--branco); font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size:14px; font-weight:600; padding: 12px 22px; border-radius: 999px; box-shadow: 0 8px 24px var(--sombra-forte); opacity:0; transition: transform .3s ease, opacity .3s ease; z-index: 999; pointer-events:none; }
+#toast.mostrar{ opacity:1; transform: translateX(-50%) translateY(0); }
+#toast.sucesso{ background: var(--verde); }
+#toast.erro{ background: var(--terra); }
+
+@media (max-width:760px){ .cx-layout{ flex-direction:column; align-items:center; } .cx-pistas{ width:100%; } }
+</style>
+</head>
+<body>
+
+<div class="textura-fundo"></div>
+
+<header class="app-header">
+  <div class="marca" id="botaoMarca">
+    <div class="marca-selo">🧠</div>
+    <div class="marca-texto">
+      <h1 class="f-display">Mente Ativa</h1>
+      <p>Palavras Cruzadas Dedicadas</p>
+    </div>
+  </div>
+  <div class="header-acoes">
+    <button class="btn btn-fantasma" id="btnGuardarTopo">💾 Guardar</button>
+    <button class="btn btn-fantasma" id="btnLimparTopo">🗑️ Limpar dados</button>
+  </div>
+</header>
+
+<main class="ecra activo" id="ecraInicio">
+  <div class="bemvindo">
+    <h2 class="f-display">Puzzles de Palavras Cruzadas</h2>
+    <p>Selecione um dos temas abaixo para iniciar uma grelha estruturada em português de Portugal. Geração dinâmica sem falhas de cruzamento.</p>
+  </div>
+  <div class="grid-temas" id="gridTemas"></div>
+</main>
+
+<section class="ecra" id="ecraCruzadas">
+  <div class="barra-jogo">
+    <div class="titulo-modulo">
+      <div id="seloTemaActivo" style="width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; background:var(--ambar); color:white;">✏️</div>
+      <div>
+        <h2 class="f-display" id="cruzadasTitulo">Palavras Cruzadas</h2>
+        <p class="sub" id="cruzadasSubtitulo">A carregar…</p>
+      </div>
+    </div>
+    <div class="barra-jogo-acoes">
+      <select class="btn" id="selectNivelCruzadas">
+        <!-- Nível Fácil pré-selecionado por defeito para evitar erros de arranque -->
+        <option value="facil" selected>Fácil</option>
+        <option value="medio">Médio</option>
+        <option value="dificil">Difícil</option>
+      </select>
+      <button class="btn" id="btnNovoCruzadas">🔀 Novo</button>
+      <button class="btn" id="btnVerificarCruzadas">✔️ Verificar</button>
+      <button class="btn btn-fantasma" id="btnRevelarCruzadas">👁️ Revelar</button>
+      <button class="btn btn-fantasma" id="btnVoltarCruzadas">← Voltar</button>
+    </div>
+  </div>
+  <div id="areaCruzadas"></div>
+</section>
+
+<div id="toast" role="status"></div>
+
+<!-- Modais -->
+<div class="modal-fundo" id="modalLimpar">
+  <div class="modal">
+    <h3 class="f-display">Apagar o progresso local?</h3>
+    <p>Isto irá limpar permanentemente as suas estatísticas e puzzles guardados neste dispositivo.</p>
+    <div class="modal-acoes">
+      <button class="btn" id="btnCancelarLimpar">Cancelar</button>
+      <button class="btn btn-perigo" id="btnConfirmarLimpar">Apagar tudo</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modalConfirmar">
+  <div class="modal">
+    <h3 class="f-display">Mudar de Puzzle?</h3>
+    <p id="textoConfirmar">O seu progresso na grelha actual será substituído.</p>
+    <div class="modal-acoes">
+      <button class="btn" id="btnConfirmarNao">Cancelar</button>
+      <button class="btn btn-primario" id="btnConfirmarSim">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modalRevelar">
+  <div class="modal">
+    <h3 class="f-display">Mostrar soluções?</h3>
+    <p>A grelha será totalmente preenchida e o progresso deste desafio será encerrado.</p>
+    <div class="modal-acoes">
+      <button class="btn" id="btnCancelarRevelar">Cancelar</button>
+      <button class="btn btn-perigo" id="btnConfirmarRevelar">Revelar tudo</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modalConclusao">
+  <div class="modal">
+    <div style="font-size:40px; margin-bottom:10px;">🏆</div>
+    <h3 class="f-display">Grelha Concluída!</h3>
+    <p id="textoConclusao">Parabéns, desvendou todas as intersecções.</p>
+    <div class="modal-acoes modal-acoes-col">
+      <button class="btn btn-primario" id="btnConclusaoNovo">🔁 Gerar novo puzzle neste tema</button>
+      <button class="btn" id="btnConclusaoMenu">🎲 Voltar à seleção de temas</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const CX_TEMAS = [
+  {id:'geral', nome:'Cultura Geral', icone:'🌍', cor:'linear-gradient(155deg, #4A6FA5, #35507C)'},
+  {id:'natureza', nome:'Natureza e Ciência', icone:'🍃', cor:'linear-gradient(155deg, #4C6B4F, #3A523C)'},
+  {id:'portugal', nome:'Portugal', icone:'🇵🇹', cor:'linear-gradient(155deg, #B5503F, #8F3A2A)'},
+  {id:'saude', nome:'Saúde e Corpo', icone:'🩺', cor:'linear-gradient(155deg, #C2702C, #9A551E)'},
+  {id:'artes', nome:'Artes e Letras', icone:'🎭', cor:'linear-gradient(155deg, #7A5C8F, #5C4368)'},
+  {id:'viagens', nome:'Viagens e Lugares', icone:'✈️', cor:'linear-gradient(155deg, #9A8A5C, #756842)'}
+];
+
+// O Novo Dicionário Integrado com Lotes Robustos
+const DICIONARIO = {
+  "saude": {
+    "facil": [
+      { w: "DENTE", q: "Estrutura dura da boca usada para mastigar" },
+      { w: "BOCA", q: "Cavidade onde se inicia a digestão" },
+      { w: "OSSO", q: "Parte rígida do esqueleto" },
+      { w: "PELE", q: "O maior órgão do corpo humano" },
+      { w: "VEIA", q: "Vaso que transporta o sangue para o coração" },
+      { w: "SANGUE", q: "Líquido vital de cor vermelha" },
+      { w: "CARIE", q: "Lesão estrutural nos dentes" },
+      { w: "FEBRE", q: "Aumento anormal da temperatura corporal" },
+      { w: "TOSSE", q: "Reflexo respiratório comum em constipações" },
+      { w: "VIRUS", q: "Agente infecioso microscópico" },
+      { w: "SALIVA", q: "Líquido aquoso que umedece a cavidade oral" }
+    ],
+    "medio": [
+      { w: "BUCINADOR", q: "Músculo da bochecha auxiliar na mastigação" },
+      { w: "CLINICA", q: "Espaço dedicado à prestação de cuidados de saúde" },
+      { w: "HIGIENE", q: "Conjunto de práticas de limpeza pessoal" },
+      { w: "PACIENTE", q: "Pessoa sob cuidados médicos ou dentários" },
+      { w: "ESMALTE", q: "Camada externa protetora do dente" },
+      { w: "GENGIVA", q: "Tecido mole que envolve a base dos dentes" },
+      { w: "BIOFILME", q: "Placa bacteriana acumulada nas superfícies" },
+      { w: "RECEITA", q: "Prescrição médica para aviar na farmácia" },
+      { w: "SINTOMA", q: "Sinal indicador de uma doença" },
+      { w: "PAROTIDEO", q: "Ducto que transporta saliva para a boca" },
+      { w: "PULSO", q: "Ritmo do batimento cardíaco sentido no pulso" }
+    ],
+    "dificil": [
+      { w: "ESTERILIZAR", q: "Eliminar totalmente os microrganismos de um instrumento" },
+      { w: "AUTOCLAVE", q: "Aparelho utilizado para esterilização a vapor" },
+      { w: "BIOLOGICO", q: "Tipo de risco associado ao manuseamento de fluidos corporais" },
+      { w: "PATOLOGIA", q: "Ramo da medicina que estuda as doenças" },
+      { w: "DIAGNOSTICO", q: "Determinação de uma doença a partir dos sintomas" },
+      { w: "TRATAMENTO", q: "Conjunto de meios usados para curar uma maleita" },
+      { w: "PREVENCAO", q: "Ato de evitar antecipadamente um problema de saúde" },
+      { w: "RADIOGRAFIA", q: "Imagem do interior do corpo por raios-X" },
+      { w: "ANESTESIA", q: "Técnica para suprimir a dor durante uma intervenção" },
+      { w: "RESIDUOS", q: "Lixo biológico não refrigerado guardado no máximo trinta dias" }
+    ]
+  },
+  "portugal": {
+    "facil": [
+      { w: "PORTO", q: "A cidade Invicta do Norte" },
+      { w: "PRAIA", q: "Faixa de areal costeiro" },
+      { w: "MINHO", q: "Rio que nasce em Espanha e desagua em Caminha" },
+      { w: "FADO", q: "Estilo musical tradicional português" },
+      { w: "TEJO", q: "O maior rio da Península Ibérica" },
+      { w: "GADO", q: "Conjunto de animais criados em pasto" },
+      { w: "GALO", q: "Símbolo tradicional de Barcelos" },
+      { w: "MAR", q: "Vasta extensão de água salgada" },
+      { w: "VINHO", q: "Bebida alcoólica proveniente da uva" },
+      { w: "PADEIRA", q: "A mítica padeira de Aljubarrota" },
+      { w: "CASTELO", q: "Fortificação medieval defensiva" }
+    ],
+    "medio": [
+      { w: "VIANA", q: "___ do Castelo, cidade do Alto Minho" },
+      { w: "DARQUE", q: "Vila situada na margem esquerda do rio Lima" },
+      { w: "LISBOA", q: "Capital de Portugal, a cidade das sete colinas" },
+      { w: "ALGARVE", q: "Região mais a sul de Portugal Continental" },
+      { w: "AZULEJO", q: "Placa de cerâmica decorativa muito usada em Portugal" },
+      { w: "BACALHAU", q: "Peixe muito presente na gastronomia portuguesa" },
+      { w: "SARDINHA", q: "Peixe típico dos Santos Populares" },
+      { w: "LUSITANO", q: "Relativo aos antigos habitantes da Península Ibérica" },
+      { w: "BORDALO", q: "Mestre ceramista e caricaturista português" },
+      { w: "ESTRELA", q: "A serra mais alta de Portugal Continental" },
+      { w: "ALENTEJO", q: "Vasta região a sul do rio Tejo" }
+    ],
+    "dificil": [
+      { w: "TABOAO", q: "Praia fluvial em Paredes de Coura" },
+      { w: "COURA", q: "Rio minhoto e vila famosa pelo festival de música" },
+      { w: "GUIMARAES", q: "A cidade berço da nacionalidade portuguesa" },
+      { w: "MOSTEIRO", q: "Edifício onde habita uma comunidade religiosa" },
+      { w: "DESCOBERTAS", q: "Período histórico de exploração marítima lusa" },
+      { w: "CARAVELA", q: "Embarcação usada nos Descobrimentos Portugueses" },
+      { w: "TARTARUGA", q: "Réptil marinho frequente nos mares dos Açores e Madeira" },
+      { w: "ARQUITETURA", q: "Arte de projetar edifícios, com grande tradição lusa" },
+      { w: "FRANCESINHA", q: "Típica e robusta sanduíche portuense" },
+      { w: "ANDORINHA", q: "Ave migratória símbolo do início da primavera" }
+    ]
+  },
+  "natureza": {
+    "facil": [
+      { w: "FLOR", q: "Parte reprodutora colorida da planta" },
+      { w: "FOGO", q: "Combustão com libertação de luz e calor" },
+      { w: "ONDA", q: "Ondulação na superfície da água do mar" },
+      { w: "GATO", q: "Felino doméstico altamente ágil" },
+      { w: "AGUA", q: "Recurso líquido incolor vital à vida" },
+      { w: "RIO", q: "Curso de água doce natural" },
+      { w: "LAGO", q: "Massa de água doce rodeada por terra" },
+      { w: "VENTO", q: "Movimento natural do ar" },
+      { w: "NEVE", q: "Precipitação de cristais de gelo" },
+      { w: "FOLHA", q: "Parte verde das plantas que capta a luz solar" }
+    ],
+    "medio": [
+      { w: "AGUIA", q: "Ave de rapina dotada de visão apurada" },
+      { w: "URSO", q: "Mamífero de grande porte, frequentemente omnívoro" },
+      { w: "FAUNA", q: "O conjunto de animais de uma região" },
+      { w: "FLORA", q: "O conjunto das espécies vegetais" },
+      { w: "ROCHA", q: "Massa sólida de minerais" },
+      { w: "CLIMA", q: "Padrão de condições meteorológicas de um local" },
+      { w: "PLANETA", q: "Corpo celeste que orbita uma estrela" },
+      { w: "FUNGOS", q: "Reino biológico que inclui os cogumelos" },
+      { w: "CELULA", q: "A unidade básica dos seres vivos" },
+      { w: "ATOMO", q: "Unidade básica da matéria" }
+    ],
+    "dificil": [
+      { w: "BOSQUE", q: "Agrupamento denso de árvores e arbustos" },
+      { w: "TRILHO", q: "Caminho pedestre muito procurado na natureza" },
+      { w: "CIRCULAR", q: "Tipo de rota que começa e acaba no mesmo ponto" },
+      { w: "FLUVIAL", q: "Relativo a rio, como uma praia de água doce" },
+      { w: "GRAVIDADE", q: "Força de atração entre os corpos com massa" },
+      { w: "EVOLUCAO", q: "Processo de mudança dos organismos ao longo do tempo" },
+      { w: "FOTOSSINTESE", q: "Processo pelo qual as plantas produzem energia" },
+      { w: "ECOSSISTEMA", q: "Comunidade de seres vivos e o seu ambiente" },
+      { w: "BIODIVERSIDADE", q: "A variedade de vida num determinado habitat" },
+      { w: "METEOROLOGIA", q: "Ciência que estuda os fenómenos atmosféricos" }
+    ]
+  },
+  "geral": {
+    "facil": [
+      { w: "LOTO", q: "Jogo popular de sorte com números" },
+      { w: "VILA", q: "Povoação de dimensão superior a uma aldeia" },
+      { w: "ALTO", q: "Elevado, o oposto de baixo" },
+      { w: "NETO", q: "O filho do próprio filho ou filha" },
+      { w: "JOGO", q: "Atividade lúdica sujeita a regras" },
+      { w: "RODA", q: "Objeto circular que gira num eixo" },
+      { w: "CASA", q: "Edifício destinado a habitação" },
+      { w: "MESA", q: "Móvel onde se servem as refeições" },
+      { w: "RUA", q: "Via pública ladeada por edifícios" },
+      { w: "LUZ", q: "Radiação eletromagnética visível" }
+    ],
+    "medio": [
+      { w: "LIVRO", q: "Conjunto encadernado de páginas impressas" },
+      { w: "LUPA", q: "Lente utilizada para ampliar objetos" },
+      { w: "VOTO", q: "Expressão de escolha num escrutínio" },
+      { w: "RATO", q: "Pequeno roedor ou periférico de computador" },
+      { w: "POTE", q: "Recipiente bojudo vulgarmente de barro" },
+      { w: "LETRA", q: "Símbolo gráfico de um alfabeto" },
+      { w: "REGRA", q: "Preceito que dita como se deve agir" },
+      { w: "DADOS", q: "Poliedros rolados em jogos de sorte ou RPGs" },
+      { w: "MAGIA", q: "Arte de produzir efeitos sobrenaturais ilusórios" },
+      { w: "ESPADA", q: "Arma branca composta por uma lâmina longa" }
+    ],
+    "dificil": [
+      { w: "ESTUDO", q: "Ato de procurar ativamente novos conhecimentos" },
+      { w: "EXAME", q: "Avaliação formal de um conhecimento" },
+      { w: "TEMA", q: "Assunto sobre o qual incide um debate" },
+      { w: "XAROPE", q: "Líquido espesso, frequentemente medicinal" },
+      { w: "MEMORIA", q: "Faculdade de reter e recuperar informações" },
+      { w: "TREINO", q: "Preparação física ou mental metódica" },
+      { w: "LOGICA", q: "Ramo da filosofia que estuda o raciocínio válido" },
+      { w: "FILOSOFIA", q: "Estudo de questões fundamentais sobre a existência" },
+      { w: "CONHECIMENTO", q: "Informação e compreensão adquiridas" },
+      { w: "COGNITIVO", q: "Relativo ao processamento de informação no cérebro" }
+    ]
+  },
+  "artes": {
+    "facil": [
+      { w: "POEMA", q: "Construção literária em versos" },
+      { w: "PENA", q: "Utensílio de escrita ancestral" },
+      { w: "ERRO", q: "Falha num texto que precisa de revisão" },
+      { w: "NORA", q: "Mecanismo para tirar água de poços" },
+      { w: "ARTE", q: "Expressão criativa humana" },
+      { w: "TELA", q: "Superfície onde o pintor aplica as tintas" },
+      { w: "COR", q: "Perceção visual desencadeada pela luz" },
+      { w: "SOM", q: "Vibração acústica percebida pelo ouvido" },
+      { w: "TOM", q: "Grau de elevação de um som musical" },
+      { w: "RIMA", q: "Repetição de sons no final dos versos" }
+    ],
+    "medio": [
+      { w: "OBRA", q: "Trabalho artístico completo de um autor" },
+      { w: "OITO", q: "O número que se segue ao sete" },
+      { w: "REI", q: "Monarca presente em tragédias clássicas" },
+      { w: "IDEIA", q: "O embrião criativo na mente do artista" },
+      { w: "AUTOR", q: "Criador de uma obra literária ou artística" },
+      { w: "PINTOR", q: "Artista que se exprime através de quadros" },
+      { w: "MURAL", q: "Pintura executada diretamente numa parede" },
+      { w: "TEATRO", q: "Arte de representar uma história perante um público" },
+      { w: "PALCO", q: "Estrado onde os atores se apresentam" },
+      { w: "MUSEU", q: "Instituição que preserva e expõe coleções" }
+    ],
+    "dificil": [
+      { w: "CENA", q: "Parte em que se subdivide um ato teatral" },
+      { w: "CORO", q: "Grupo musical de canto coletivo num palco" },
+      { w: "NOTA", q: "Sinal gráfico que representa um som musical" },
+      { w: "ROTA", q: "O caminho percorrido por uma narrativa" },
+      { w: "LITERATURA", q: "Arte de compor e escrever textos" },
+      { w: "ESCULTURA", q: "Arte de criar formas tridimensionais" },
+      { w: "ARQUITETURA", q: "Arte de projetar edifícios e espaços" },
+      { w: "PERSPECTIVA", q: "Técnica de representar profundidade numa tela" },
+      { w: "RENASCIMENTO", q: "Período cultural de redescoberta da antiguidade" },
+      { w: "DRAMATURGO", q: "Escritor de peças de teatro" }
+    ]
+  },
+  "viagens": {
+    "facil": [
+      { w: "MALAS", q: "Utensílios de transporte de pertences" },
+      { w: "MAPA", q: "Representação cartográfica de rotas" },
+      { w: "LUAS", q: "Satélites ou ciclos lunares contados" },
+      { w: "PULO", q: "Salto ou etapa muito curta da viagem" },
+      { w: "VOO", q: "Ato de viajar de avião" },
+      { w: "TREM", q: "Meio de transporte que circula em carris (Br)" },
+      { w: "GUIA", q: "Pessoa ou livro que orienta o percurso" },
+      { w: "RUA", q: "Caminho público numa povoação" },
+      { w: "VIA", q: "Caminho, estrada ou percurso" },
+      { w: "PAIS", q: "Território delimitado por fronteiras" }
+    ],
+    "medio": [
+      { w: "GIRO", q: "Passeio rápido e agradável (coloquial)" },
+      { w: "IATE", q: "Embarcação luxuosa de recreio" },
+      { w: "ROTA", q: "Caminho planeado num mapa" },
+      { w: "HOTEL", q: "Estabelecimento de alojamento temporário" },
+      { w: "PONTE", q: "Construção que liga duas margens" },
+      { w: "BARCO", q: "Veículo para navegar na água" },
+      { w: "BILHETE", q: "Documento comprovativo de pagamento de passagem" },
+      { w: "METRO", q: "Transporte ferroviário urbano subterrâneo" },
+      { w: "MUSEU", q: "Local de interesse cultural numa viagem" },
+      { w: "MOCHILA", q: "Saco prático transportado às costas" }
+    ],
+    "dificil": [
+      { w: "HORA", q: "Unidade de tempo crítica para não perder o voo" },
+      { w: "TEMA", q: "O propósito cultural principal da viagem" },
+      { w: "REMA", q: "Movimento feito em passeios náuticos braçais" },
+      { w: "AEROPORTO", q: "Infraestrutura para a aterragem de aviões" },
+      { w: "PASSAPORTE", q: "Documento oficial necessário para viajar além-fronteiras" },
+      { w: "FRONTEIRA", q: "Linha limite entre dois Estados" },
+      { w: "CONTINENTE", q: "Grande extensão contínua de terra" },
+      { w: "EXPEDICAO", q: "Viagem organizada com fins científicos ou de exploração" },
+      { w: "ITINERARIO", q: "Programa detalhado de uma viagem" },
+      { w: "CRUZEIRO", q: "Viagem turística de barco com várias paragens" }
+    ]
+  }
+};
+
+
+const ARMAZEM = {
+  CHAVE: 'cruzadas_pwa_save',
+  ler(){ try{ const s=localStorage.getItem(this.CHAVE); return s?JSON.parse(s):null; }catch(e){return null;} },
+  guardar(v){ try{ localStorage.setItem(this.CHAVE, JSON.stringify(v)); }catch(e){} },
+  limpar(){ try{ localStorage.removeItem(this.CHAVE); }catch(e){} }
+};
+
+// Algoritmo Gerador Dinâmico
+const MotorGrelhas = {
+  gerar(listaPalavras, maxPalavras = 5) {
+    if(!listaPalavras || listaPalavras.length === 0) return null;
+    
+    // Baralha a lista para puzzles únicos
+    let candidatas = [...listaPalavras].sort(() => 0.5 - Math.random()).slice(0, maxPalavras);
+    candidatas.sort((a, b) => b.w.length - a.w.length); // Maiores primeiro
+    
+    let grelhaTemp = Array(30).fill(null).map(() => Array(30).fill('.'));
+    let palavrasColocadas = [];
+    
+    // Coloca a 1ª palavra no centro
+    const p1 = candidatas[0];
+    const rInicial = 15;
+    const cInicial = 15 - Math.floor(p1.w.length / 2);
+    
+    for(let i = 0; i < p1.w.length; i++) grelhaTemp[rInicial][cInicial + i] = p1.w[i];
+    palavrasColocadas.push({ w: p1.w, q: p1.q, r: rInicial, c: cInicial, d: 'H' });
+    
+    // Tenta cruzar as restantes
+    for(let i = 1; i < candidatas.length; i++) {
+      let pAlvo = candidatas[i];
+      let colocada = false;
+      
+      for(let pc of palavrasColocadas) {
+        if(colocada) break;
+        // Procura letras em comum
+        for(let j = 0; j < pAlvo.w.length; j++) {
+          if(colocada) break;
+          let letra = pAlvo.w[j];
+          let k = pc.w.indexOf(letra);
+          
+          if(k !== -1) {
+            let rNova, cNova, dNova;
+            if(pc.d === 'H') { rNova = pc.r - j; cNova = pc.c + k; dNova = 'V'; } 
+            else { rNova = pc.r + k; cNova = pc.c - j; dNova = 'H'; }
+            
+            if(this.podeColocar(grelhaTemp, pAlvo.w, rNova, cNova, dNova)) {
+              for(let m = 0; m < pAlvo.w.length; m++) {
+                if(dNova === 'H') grelhaTemp[rNova][cNova + m] = pAlvo.w[m];
+                else grelhaTemp[rNova + m][cNova] = pAlvo.w[m];
+              }
+              palavrasColocadas.push({ w: pAlvo.w, q: pAlvo.q, r: rNova, c: cNova, d: dNova });
+              colocada = true;
+            }
+          }
+        }
+      }
+    }
+    
+    return this.recortarGrelha(grelhaTemp, palavrasColocadas);
+  },
+  
+  podeColocar(grelha, palavra, r, c, d) {
+    if(r < 0 || c < 0 || (d === 'H' && c + palavra.length >= 30) || (d === 'V' && r + palavra.length >= 30)) return false;
+    
+    for(let i = 0; i < palavra.length; i++) {
+      let rAtual = d === 'H' ? r : r + i;
+      let cAtual = d === 'H' ? c + i : c;
+      let rEsq = d === 'H' ? rAtual - 1 : rAtual;
+      let cEsq = d === 'H' ? cAtual : cAtual - 1;
+      let rDir = d === 'H' ? rAtual + 1 : rAtual;
+      let cDir = d === 'H' ? cAtual : cAtual + 1;
+      
+      // Se já tem uma letra, tem de ser igual
+      if(grelha[rAtual][cAtual] !== '.' && grelha[rAtual][cAtual] !== palavra[i]) return false;
+      
+      // Se a casa está vazia, as casas adjacentes perpendiculares também têm de estar vazias (para não colar noutras palavras)
+      if(grelha[rAtual][cAtual] === '.') {
+        if(rEsq >= 0 && cEsq >= 0 && grelha[rEsq][cEsq] !== '.') return false;
+        if(rDir < 30 && cDir < 30 && grelha[rDir][cDir] !== '.') return false;
+      }
+      
+      // Verificar extremos da palavra
+      if(i === 0) {
+        let rAtras = d === 'H' ? rAtual : rAtual - 1;
+        let cAtras = d === 'H' ? cAtual - 1 : cAtual;
+        if(rAtras >= 0 && cAtras >= 0 && grelha[rAtras][cAtras] !== '.') return false;
+      }
+      if(i === palavra.length - 1) {
+        let rFrente = d === 'H' ? rAtual : rAtual + 1;
+        let cFrente = d === 'H' ? cAtual + 1 : cAtual;
+        if(rFrente < 30 && cFrente < 30 && grelha[rFrente][cFrente] !== '.') return false;
+      }
+    }
+    return true;
+  },
+  
+  recortarGrelha(grelhaTemp, palavras) {
+    let minR = 30, maxR = 0, minC = 30, maxC = 0;
+    for(let r = 0; r < 30; r++) {
+      for(let c = 0; c < 30; c++) {
+        if(grelhaTemp[r][c] !== '.') {
+          minR = Math.min(minR, r); maxR = Math.max(maxR, r);
+          minC = Math.min(minC, c); maxC = Math.max(maxC, c);
+        }
+      }
+    }
+    
+    // Ajustar as coordenadas das palavras ao novo corte
+    const palavrasAjustadas = palavras.map(p => ({
+      ...p, r: p.r - minR, c: p.c - minC
+    }));
+    
+    const linhas = [];
+    for(let r = minR; r <= maxR; r++) {
+      linhas.push(grelhaTemp[r].slice(minC, maxC + 1).join(''));
+    }
+    
+    return {
+      nrows: maxR - minR + 1,
+      size: maxC - minC + 1,
+      rows: linhas,
+      words: palavrasAjustadas
+    };
+  }
+};
+
+const CruzadasUI = (function(){
+  let cur = null, grelha = null, seleccao = null, direccao = 'H';
+  let pausado = false, segundos = 0, temporizador = null, revelado = false, finalizado = false;
+
+  function inicializar(){
+    const container = document.getElementById('gridTemas');
+    container.innerHTML = CX_TEMAS.map((t, idx) => `
+      <button class="cartao-tema" data-idx="${idx}">
+        <div class="cartao-selo" style="background:${t.cor}">${t.icone}</div>
+        <h3 class="f-display">${t.nome}</h3>
+        <p>Grelhas com cálculo dinâmico de intersecções sem falhas de espaços mortos.</p>
+        <div class="cartao-rodape">
+          <span class="pill-progresso">Disponível</span>
+        </div>
+      </button>
+    `).join('');
+
+    container.querySelectorAll('.cartao-tema').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.idx);
+        abrirDesafio(idx, document.getElementById('selectNivelCruzadas').value);
+      });
+    });
+
+    document.getElementById('selectNivelCruzadas').addEventListener('change', e => {
+      if(cur && !finalizado) confirmarMudanca(() => abrirDesafio(cur.temaIdx, e.target.value));
+      else if(cur) abrirDesafio(cur.temaIdx, e.target.value);
+    });
+
+    document.getElementById('btnNovoCruzadas').addEventListener('click', () => {
+      if(cur && !finalizado) confirmarMudanca(() => abrirDesafio(cur.temaIdx, cur.nivel));
+      else if(cur) abrirDesafio(cur.temaIdx, cur.nivel);
+    });
+
+    document.getElementById('btnVerificarCruzadas').addEventListener('click', verificarGrelha);
+    document.getElementById('btnRevelarCruzadas').addEventListener('click', proporRevelacao);
+    
+    document.getElementById('btnVoltarCruzadas').addEventListener('click', () => {
+      guardarEstadoActual(); pararTemporizador(); irPara('ecraInicio');
+    });
+
+    document.getElementById('btnCancelarLimpar').onclick = () => fecharModal('modalLimpar');
+    document.getElementById('btnConfirmarLimpar').onclick = () => { ARMAZEM.limpar(); window.location.reload(); };
+    document.getElementById('btnLimparTopo').onclick = () => abrirModal('modalLimpar');
+    document.getElementById('btnGuardarTopo').onclick = () => { guardarEstadoActual(); lancarToast('Progresso guardado localmente.', 'sucesso'); };
+
+    document.getElementById('btnConclusaoNovo').onclick = () => { fecharModal('modalConclusao'); abrirDesafio(cur.temaIdx, cur.nivel); };
+    document.getElementById('btnConclusaoMenu').onclick = () => { fecharModal('modalConclusao'); irPara('ecraInicio'); };
+
+    const salvo = ARMAZEM.ler();
+    if(salvo) restaurarEstado(salvo);
+  }
+
+  function confirmarMudanca(onSim){
+    abrirModal('modalConfirmar');
+    document.getElementById('btnConfirmarSim').onclick = () => { fecharModal('modalConfirmar'); onSim(); };
+    document.getElementById('btnConfirmarNao').onclick = () => { fecharModal('modalConfirmar'); };
+  }
+
+  function abrirDesafio(temaIdx, nivel){
+    const tema = CX_TEMAS[temaIdx];
+    
+    // Usa a variável DICIONARIO local
+    const listaPalavrasTema = DICIONARIO[tema.id][nivel] || [];
+    
+    if(listaPalavrasTema.length === 0) {
+      lancarToast('Ainda não existem palavras configuradas para este tema/nível.', 'erro');
+      return;
+    }
+
+    const dimensoes = MotorGrelhas.gerar(listaPalavrasTema, 5); // Tenta cruzar 5 palavras
+    
+    if(!dimensoes) {
+      lancarToast('Não foi possível gerar um puzzle viável com as palavras atuais. Tente de novo.', 'erro');
+      return;
+    }
+
+    cur = {
+      temaIdx, id: tema.id, nome: tema.nome, nivel,
+      size: dimensoes.size, nrows: dimensoes.nrows,
+      rows: dimensoes.rows, words: dimensoes.words
+    };
+
+    grelha = [];
+    for(let r=0; r<cur.nrows; r++){
+      grelha.push([]);
+      for(let c=0; c<cur.size; c++){
+        const isBloco = cur.rows[r][c] === '.';
+        grelha[r].push({ bloco: isBloco, resposta: isBloco ? '' : cur.rows[r][c], utilizador: '', num: 0 });
+      }
+    }
+
+    let n = 1;
+    cur.words.forEach(w => {
+      if(grelha[w.r] && grelha[w.r][w.c] && !grelha[w.r][w.c].bloco && grelha[w.r][w.c].num === 0){
+        grelha[w.r][w.c].num = n++;
+      }
+    });
+
+    seleccao = null; direccao = 'H'; pausado = false; segundos = 0; revelado = false; finalizado = false;
+    document.getElementById('cruzadasSubtitulo').textContent = `${tema.nome} · Nível ${cur.nivel.toUpperCase()}`;
+    const selo = document.getElementById('seloTemaActivo');
+    selo.textContent = tema.icone; selo.style.background = tema.cor;
+    
+    irPara('ecraCruzadas'); renderizarTabuleiro(); iniciarTemporizador();
+  }
+
+  function restaurarEstado(s){
+    cur = s.cur; grelha = s.grelha; seleccao = s.seleccao; direccao = s.direccao;
+    segundos = s.segundos; revelado = s.revelado; finalizado = s.finalizado; pausado = false;
+    document.getElementById('selectNivelCruzadas').value = cur.nivel;
+    document.getElementById('cruzadasSubtitulo').textContent = `${cur.nome} · Nível ${cur.nivel.toUpperCase()}`;
+    const tema = CX_TEMAS[cur.temaIdx];
+    const selo = document.getElementById('seloTemaActivo');
+    selo.textContent = tema.icone; selo.style.background = tema.cor;
+    
+    irPara('ecraCruzadas'); renderizarTabuleiro();
+    if(revelado || finalizado) bloquearGrelhaCompleta(); else iniciarTemporizador();
+  }
+
+  function guardarEstadoActual(){ if(cur && grelha) ARMAZEM.guardar({ cur, grelha, seleccao, direccao, segundos, revelado, finalizado }); }
+
+  function renderizarTabuleiro(){
+    const area = document.getElementById('areaCruzadas');
+    area.innerHTML = `
+      <div class="cx-barra-progresso-wrap"><div class="cx-barra-progresso-fill" id="cxBarraFill"></div></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div class="f-corpo" style="display:flex; gap:16px; font-size:14px; color:var(--tinta-suave);">
+          <span>⏱️ <b id="cxTimer">00:00</b></span>
+          <span>✓ <b id="cxFeitas">0</b>/<b id="cxTotal">0</b> intersecções</span>
+        </div>
+        <button class="btn btn-fantasma" id="btnPausaCruzadas">⏸️ Pausa</button>
+      </div>
+      <div class="cx-layout">
+        <div class="cx-tabuleiro-wrap">
+          <div class="cx-tabuleiro" id="cxTabuleiro">
+            <div class="cx-grelha" id="cxGrelha"></div>
+            <div class="cx-pausa-cobertura" id="cxPausaCobertura">
+              <div style="font-size:32px;">⏸️</div><div class="f-display" style="font-size:16px;">Grelha Ocultada</div>
+              <button class="btn btn-primario" id="btnContinuarCruzadas">▶️ Retomar desafio</button>
+            </div>
+          </div>
+        </div>
+        <div class="cx-pistas">
+          <div class="cx-grupo-pistas"><div class="cx-grupo-titulo">Horizontais</div><div id="cxPistasH"></div></div>
+          <div class="cx-grupo-pistas"><div class="cx-grupo-titulo">Verticais</div><div id="cxPistasV"></div></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btnPausaCruzadas').onclick = alternarPausa;
+    document.getElementById('btnContinuarCruzadas').onclick = alternarPausa;
+
+    const elG = document.getElementById('cxGrelha');
+    elG.style.gridTemplateColumns = `repeat(${cur.size}, 1fr)`;
+    elG.innerHTML = '';
+
+    for(let r=0; r<cur.nrows; r++){
+      for(let c=0; c<cur.size; c++){
+        const cel = grelha[r][c];
+        const div = document.createElement('div');
+        div.className = 'cx-celula' + (cel.bloco ? ' bloco' : '');
+        div.dataset.r = r; div.dataset.c = c;
+
+        if(!cel.bloco){
+          if(cel.num > 0){
+            const sp = document.createElement('span'); sp.className = 'num'; sp.textContent = cel.num;
+            div.appendChild(sp);
+          }
+          const inp = document.createElement('input');
+          inp.type = 'text'; inp.maxLength = 1; inp.value = cel.utilizador;
+          inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false');
+          
+          inp.addEventListener('focus', () => estabelecerFoco(r, c));
+          inp.addEventListener('keydown', e => tratarTeclado(e, r, c));
+          inp.addEventListener('beforeinput', e => tratarAntesDeInserir(e, r, c));
+          inp.addEventListener('input', e => tratarInsercao(e, r, c));
+          inp.addEventListener('click', () => tratarClique(r, c));
+
+          div.appendChild(inp);
+        }
+        elG.appendChild(div);
+      }
+    }
+    actualizarPistasLayout(); actualizarMetricas(); renderTemporizador();
+  }
+
+  function obterDiv(r, c){ return document.querySelector(`.cx-celula[data-r="${r}"][data-c="${c}"]`); }
+  function obterInput(r, c){ const d = obterDiv(r, c); return d ? d.querySelector('input') : null; }
+  function obterCelulasDaPalavra(w){ const o = []; for(let i=0; i<w.w.length; i++) o.push(w.d === 'H' ? [w.r, w.c + i] : [w.r + i, w.c]); return o; }
+  function obterPalavraNaPosicao(r, c, dir){ return cur.words.find(w => w.d === dir && obterCelulasDaPalavra(w).some(([rr, cc]) => rr === r && cc === c)); }
+  function estaCompletada(w){ return obterCelulasDaPalavra(w).every(([r, c]) => grelha[r][c].utilizador === grelha[r][c].resposta); }
+
+  function realcarInterface(){
+    document.querySelectorAll('.cx-celula').forEach(el => el.classList.remove('letra-activa', 'palavra-activa'));
+    if(!seleccao) return;
+    const [r, c] = seleccao; const w = obterPalavraNaPosicao(r, c, direccao);
+    if(w){ obterCelulasDaPalavra(w).forEach(([rr, cc]) => { const d = obterDiv(rr, cc); if(d) d.classList.add('palavra-activa'); }); }
+    const d = obterDiv(r, c); if(d) d.classList.add('letra-activa');
+    
+    document.querySelectorAll('.cx-pista').forEach(p => p.classList.remove('activa'));
+    if(w){ const elP = document.querySelector(`.cx-pista[data-key="${w.r},${w.c},${w.d}"]`); if(elP){ elP.classList.add('activa'); elP.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } }
+  }
+
+  function estabelecerFoco(r, c){
+    if(pausado || revelado || finalizado) return;
+    if(!seleccao || seleccao[0] !== r || seleccao[1] !== c){
+      if(!obterPalavraNaPosicao(r, c, direccao)) direccao = (direccao === 'H') ? 'V' : 'H';
+      seleccao = [r, c]; realcarInterface();
+    }
+  }
+
+  function tratarClique(r, c){
+    if(pausado || revelado || finalizado) return;
+    if(seleccao && seleccao[0] === r && seleccao[1] === c){
+      const outraDir = (direccao === 'H') ? 'V' : 'H'; if(obterPalavraNaPosicao(r, c, outraDir)) direccao = outraDir;
+    }
+    seleccao = [r, c]; realcarInterface();
+  }
+
+  function obterCelulaVizinha(r, c, dir, sentido){
+    let rr = r, cc = c;
+    while(true){
+      if(dir === 'H') cc += sentido; else rr += sentido;
+      if(rr < 0 || cc < 0 || rr >= cur.nrows || cc >= cur.size) return null;
+      if(!grelha[rr][cc].bloco) return [rr, cc]; 
+    }
+  }
+
+  function avancarCursor(r, c){
+    const prox = obterCelulaVizinha(r, c, direccao, 1);
+    if(prox){ seleccao = prox; realcarInterface(); const inp = obterInput(prox[0], prox[1]); if(inp) inp.focus(); }
+  }
+
+  function recuarCursor(r, c){
+    const ant = obterCelulaVizinha(r, c, direccao, -1);
+    if(ant){ seleccao = ant; realcarInterface(); const inp = obterInput(ant[0], ant[1]); if(inp) inp.focus(); }
+  }
+
+  function tratarAntesDeInserir(e, r, c){
+    if(pausado || revelado || finalizado) return;
+    if(e.isComposing) return; const txt = e.data; if(!txt) return;
+    const novaLetra = normalizarLetra(txt.slice(-1)); if(!novaLetra) return;
+    if(grelha[r][c].utilizador === novaLetra){ e.preventDefault(); tratarConclusaoInstantanea(r, c); avancarCursor(r, c); }
+  }
+
+  function tratarInsercao(e, r, c){
+    if(pausado || revelado || finalizado){ e.target.value = grelha[r][c].utilizador; return; }
+    const letra = normalizarLetra(e.target.value.slice(-1));
+    e.target.value = letra; grelha[r][c].utilizador = letra;
+    sincronizarConformidadePistas(); actualizarMetricas(); tratarConclusaoInstantanea(r, c); verificarFimDeJogo();
+    if(letra && !finalizado) avancarCursor(r, c);
+  }
+
+  function tratarTeclado(e, r, c){
+    if(pausado || revelado || finalizado){ e.preventDefault(); return; }
+    if(e.key === 'Backspace'){
+      e.preventDefault();
+      if(grelha[r][c].utilizador !== ''){
+        grelha[r][c].utilizador = ''; const inp = obterInput(r, c); if(inp) inp.value = '';
+        sincronizarConformidadePistas(); actualizarMetricas();
+      } else {
+        recuarCursor(r, c);
+        if(seleccao){
+          grelha[seleccao[0]][seleccao[1]].utilizador = ''; const inp = obterInput(seleccao[0], seleccao[1]); if(inp) inp.value = '';
+          sincronizarConformidadePistas(); actualizarMetricas();
+        }
+      }
+      return;
+    }
+    if(e.key === 'ArrowRight'){ e.preventDefault(); direccao = 'H'; avancarCursor(r, c); }
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); direccao = 'H'; recuarCursor(r, c); }
+    if(e.key === 'ArrowDown'){ e.preventDefault(); direccao = 'V'; avancarCursor(r, c); }
+    if(e.key === 'ArrowUp'){ e.preventDefault(); direccao = 'V'; recuarCursor(r, c); }
+  }
+
+  function tratarConclusaoInstantanea(r, c){
+    const w = obterPalavraNaPosicao(r, c, direccao);
+    if(w && estaCompletada(w)){
+      obterCelulasDaPalavra(w).forEach(([rr, cc]) => { const div = obterDiv(rr, cc); if(div){ div.classList.remove('flash-palavra'); void div.offsetWidth; div.classList.add('flash-palavra'); } });
+    }
+  }
+
+  function actualizarPistasLayout(){
+    const elH = document.getElementById('cxPistasH'), elV = document.getElementById('cxPistasV');
+    elH.innerHTML = ''; elV.innerHTML = '';
+    const ordenadas = [];
+    cur.words.forEach(w => { const num = grelha[w.r][w.c].num; if(num > 0) ordenadas.push({ w, num }); });
+    ordenadas.sort((a, b) => a.num - b.num);
+
+    ordenadas.forEach(({ w, num }) => {
+      const div = document.createElement('div');
+      div.className = 'cx-pista' + (estaCompletada(w) ? ' feita' : '');
+      div.dataset.key = `${w.r},${w.c},${w.d}`;
+      div.innerHTML = `<span class="num">${num}.</span><span>${w.q} <i style="font-size:11px; opacity:0.75;">(${w.w.length} let.)</i></span>`;
+      div.onclick = () => {
+        if(revelado || finalizado) return;
+        seleccao = [w.r, w.c]; direccao = w.d; realcarInterface();
+        const inp = obterInput(w.r, w.c); if(inp) inp.focus();
+      };
+      if(w.d === 'H') elH.appendChild(div); else elV.appendChild(div);
+    });
+  }
+
+  function sincronizarConformidadePistas(){
+    cur.words.forEach(w => { const el = document.querySelector(`.cx-pista[data-key="${w.r},${w.c},${w.d}"]`); if(el) el.classList.toggle('feita', estaCompletada(w)); });
+  }
+
+  function actualizarMetricas(){
+    if(!cur) return;
+    const completas = cur.words.filter(estaCompletada).length;
+    document.getElementById('cxFeitas').textContent = completas;
+    document.getElementById('cxTotal').textContent = cur.words.length;
+    document.getElementById('cxBarraFill').style.width = (completas / cur.words.length * 100) + '%';
+  }
+
+  function verificarFimDeJogo(){
+    if(!cur || revelado || finalizado) return;
+    if(!cur.words.every(estaCompletada)) return;
+    finalizado = true; pararTemporizador(); bloquearGrelhaCompleta();
+    const m = Math.floor(segundos / 60), s = segundos % 60;
+    document.getElementById('textoConclusao').textContent = `Desafio superado com sucesso em ${m}m e ${s}s.`;
+    abrirModal('modalConclusao'); guardarEstadoActual();
+  }
+
+  function verificarGrelha(){
+    if(!cur || finalizado || revelado) return;
+    let certas = 0, erradas = 0;
+    for(let r=0; r<cur.nrows; r++){
+      for(let c=0; c<cur.size; c++){
+        const cel = grelha[r][c]; if(cel.bloco || !cel.utilizador) continue;
+        const div = obterDiv(r, c);
+        if(cel.utilizador === cel.resposta){ certas++; div.classList.add('certo'); } else { erradas++; div.classList.add('errado'); }
+      }
+    }
+    if(!certas && !erradas){ lancarToast('Preencha pelo menos uma letra antes de verificar.', 'erro'); return; }
+    lancarToast(erradas === 0 ? `Excelente! ${certas} letras validadas.` : `${certas} corretas · ${erradas} incorretas.`, erradas > 0 ? 'erro' : 'sucesso');
+    setTimeout(() => { document.querySelectorAll('.cx-celula').forEach(el => el.classList.remove('certo', 'errado')); realcarInterface(); }, 2000);
+  }
+
+  function proporRevelacao(){
+    if(!cur || finalizado || revelado) return;
+    abrirModal('modalRevelar');
+    document.getElementById('btnConfirmarRevelar').onclick = () => {
+      fecharModal('modalRevelar'); revelado = true; pararTemporizador();
+      for(let r=0; r<cur.nrows; r++){
+        for(let c=0; c<cur.size; c++){
+          if(!grelha[r][c].bloco){ grelha[r][c].utilizador = grelha[r][c].resposta; const inp = obterInput(r, c); if(inp) inp.value = grelha[r][c].resposta; }
+        }
+      }
+      bloquearGrelhaCompleta(); actualizarPistasLayout(); actualizarMetricas(); guardarEstadoActual();
+    };
+    document.getElementById('btnCancelarRevelar').onclick = () => fecharModal('modalRevelar');
+  }
+
+  function bloquearGrelhaCompleta(){
+    document.querySelectorAll('.cx-celula input').forEach(inp => { inp.readOnly = true; inp.tabIndex = -1; });
+    seleccao = null; realcarInterface();
+  }
+
+  function alternarPausa(){
+    if(!cur || revelado || finalizado) return;
+    pausado = !pausado;
+    if(pausado) pararTemporizador(); else iniciarTemporizador();
+    document.getElementById('cxPausaCobertura').classList.toggle('aberta', pausado);
+    document.getElementById('btnPausaCruzadas').textContent = pausado ? '▶️ Retomar' : '⏸️ Pausa';
+  }
+
+  function iniciarTemporizador(){ pararTemporizador(); if(!pausado && !revelado && !finalizado) temporizador = setInterval(() => { segundos++; renderTemporizador(); }, 1000); }
+  function pararTemporizador(){ if(temporizador) clearInterval(temporizador); temporizador = null; }
+  function renderTemporizador(){ const el = document.getElementById('cxTimer'); if(el) el.textContent = String(Math.floor(segundos/60)).padStart(2,'0')+':'+String(segundos%60).padStart(2,'0'); }
+
+  return { inicializar };
+})();
+
+function irPara(id){ document.querySelectorAll('.ecra').forEach(e => e.classList.remove('activo')); const el = document.getElementById(id); if(el) el.classList.add('activo'); }
+function abrirModal(id){ const m = document.getElementById(id); if(m) m.classList.add('aberto'); }
+function fecharModal(id){ const m = document.getElementById(id); if(m) m.classList.remove('aberto'); }
+function lancarToast(msg, tipo){
+  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'mostrar' + (tipo ? ' '+tipo : '');
+  setTimeout(() => t.classList.remove('mostrar'), 3000);
+}
+function normalizarLetra(c){ return (c||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z]/g,''); }
+function normalizarPalavra(p){ return (p||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z]/g,''); }
+
+document.addEventListener('DOMContentLoaded', () => { CruzadasUI.inicializar(); document.getElementById('botaoMarca').onclick = () => irPara('ecraInicio'); });
+</script>
+</body>
+</html>
