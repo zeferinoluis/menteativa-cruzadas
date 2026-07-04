@@ -1,1 +1,8 @@
-
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.github.zeferinoluis.menteativacruzadas",
+    "sha256_cert_fingerprints": ["83:B4:F1:33:4C:2F:3A:62:F3:C8:1B:F9:84:1B:C0:9D:CC:46:14:A7:12:E6:97:99:61:47:60:57:96:35:6C:E8"]
+  }
+}]
