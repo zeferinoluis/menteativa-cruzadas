@@ -41,6 +41,7 @@ html, body{
   background: var(--papel);
   color: var(--tinta);
   font-family: 'Iowan Old Style', 'Palatino Linotype', 'Charter', Georgia, 'Times New Roman', serif;
+  overflow-x: hidden;
 }
 
 .f-display{ font-family: 'Iowan Old Style', Georgia, 'Palatino Linotype', serif; font-weight:700; letter-spacing:-0.01em; }
@@ -124,7 +125,10 @@ button, select, input{ font-family: inherit; }
 .cx-layout{ display:flex; gap:28px; align-items:flex-start; }
 .cx-tabuleiro-wrap{ flex:0 0 auto; background: var(--tinta); padding: 2px; border-radius: 12px; box-shadow: 0 4px 20px var(--sombra-forte); }
 .cx-tabuleiro{ position:relative; display:inline-block; overflow:hidden; border-radius:10px; background: var(--tinta); }
-.cx-grelha{ display:grid; gap:1px; background: var(--tinta); }
+
+/* touch-action: none evita o scroll nativo indesejado do Android ao arrastar o dedo na grelha */
+.cx-grelha{ display:grid; gap:1px; background: var(--tinta); touch-action: none; user-select: none; -webkit-user-select: none; }
+
 .cx-celula{ width:40px; height:40px; background: var(--branco); position:relative; }
 .cx-celula.bloco{ background: var(--tinta); }
 .cx-celula.palavra-activa{ background: var(--ambar-pale); }
@@ -278,7 +282,6 @@ const CX_TEMAS = [
   {id:'viagens', nome:'Viagens e Lugares', icone:'✈️', cor:'linear-gradient(155deg, #9A8A5C, #756842)'}
 ];
 
-// DICIONÁRIO INTEGRADO EXPANDIDO - FOCO EM COMPLEXIDADE ELEVADA
 const DICIONARIO = {
   "saude": {
     "facil": [
@@ -325,7 +328,7 @@ const DICIONARIO = {
       { w: "EFEMERO", q: "Que tem pouca duração; passageiro como o ciclo de certos insetos" },
       { w: "BIOLUMINESCENCIA", q: "Produção e emissão de luz por parte de um organismo vivo" },
       { w: "ENDEMISMO", q: "Fenómeno em que uma espécie ocorre exclusivamente numa região" },
-      { w: "ANACRONISMO", q: "Colocação de elementos naturais ou históricos fora da sua era correta" },
+      { w: "ANACRONISMO", q: "Colocação de elements naturais ou históricos fora da sua era correta" },
       { w: "XEROFITA", q: "Planta adaptada a viver em ambientes com extrema escassez de água" },
       { w: "CONFLUENCIA", q: "Ponto de junção ou encontro de duas correntes de água ou rios" },
       { w: "FOTOSSINTESE", q: "Processo bioquímico pelo qual as plantas convertem luz em energia" },
@@ -354,7 +357,7 @@ const DICIONARIO = {
       { w: "TERGIVERSAR", q: "Utilizar subterfúgios ou evasivas; hesitar, não ir direto ao assunto" },
       { w: "PARADOXO", q: "Contradição aparente que desafia as leis da lógica tradicional" },
       { w: "LOGRIFICO", q: "Que tem o caráter de um enigma difícil; obscuro ou indecifrável" },
-      { w: "JUXTAPOSTO", q: "Colocado imediatamente ao lado de outra coisa, sem interposição" },
+      { w: "JUSTAPOSTO", q: "Colocado imediatamente ao lado de outra coisa, sem interposição" },
       { w: "FASTIDIOSO", q: "Que causa tédio ou contrariedade; profundamente aborrecido" },
       { w: "SINECURA", q: "Cargo altamente rendoso que exige muito pouco ou nenhum trabalho" }
     ]
@@ -701,6 +704,10 @@ const CruzadasUI = (function(){
     const elG = document.getElementById('cxGrelha');
     elG.style.gridTemplateColumns = `repeat(${cur.size}, 1fr)`;
     elG.innerHTML = '';
+
+    // Intercepta eventos de arrasto nativos para anular o scroll fantasma no ecran de jogo
+    elG.addEventListener('pointerdown', e => { if(e.target.tagName === 'INPUT') e.stopPropagation(); }, {passive: true});
+    elG.addEventListener('pointermove', e => { e.preventDefault(); }, {passive: false});
 
     for(let r=0; r<cur.nrows; r++){
       for(let c=0; c<cur.size; c++){
