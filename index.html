@@ -126,7 +126,6 @@ button, select, input{ font-family: inherit; }
 .cx-tabuleiro-wrap{ flex: 1 1 auto; width: 100%; overflow-x: auto; background: var(--tinta); padding: 8px; border-radius: 12px; box-shadow: 0 4px 20px var(--sombra-forte); }
 .cx-tabuleiro{ position:relative; display:block; background: var(--tinta); margin: 0 auto; }
 
-/* Grelha fluida calculada com base na largura da viewport (vw) */
 .cx-grelha{ display:grid; gap:1px; background: var(--tinta); touch-action: manipulation; margin: 0 auto; width: max-content; max-width: 100%; }
 
 .cx-celula{ width: 3.2vw; height: 3.2vw; min-width: 26px; min-height: 26px; max-width: 40px; max-height: 40px; background: var(--branco); position:relative; }
@@ -164,12 +163,11 @@ button, select, input{ font-family: inherit; }
 .modal-acoes-col{ flex-direction:column; }
 .modal-acoes-col .btn { width: 100%; justify-content: center; }
 
-/* Correção de Layout Crítico para iPad Vertical e Dispositivos Mobile */
 @media (max-width: 1024px) {
   .cx-layout { flex-direction: column; align-items: stretch; gap: 20px; }
   .cx-tabuleiro-wrap { width: 100%; display: block; overflow-x: auto; }
   .cx-pistas { width: 100%; }
-  .cx-grupo-pistas { max-height: none; height: auto; overflow-y: visible; } /* Liberta o texto para expandir verticalmente sem cortes */
+  .cx-grupo-pistas { max-height: none; height: auto; overflow-y: visible; }
   .barra-jogo { flex-direction: column; align-items: flex-start; gap: 12px; }
   .barra-jogo-acoes { width: 100%; justify-content: flex-start; }
 }
@@ -299,7 +297,17 @@ const DICIONARIO = {
       { w: "ESMALTE", q: "Camada externa protetora do dente" },
       { w: "GENGIVA", q: "Tecido mole que envolve a base dos dentes" },
       { w: "BIOFILME", q: "Placa bacteriana acumulada nas superfícies" },
-      { w: "SINTOMA", q: "Sinal indicador de uma patologia" }
+      { w: "SINTOMA", q: "Sinal indicador de uma patologia" },
+      { w: "ARTERIA", q: "Vaso que leva o sangue oxigenado a partir do coracao" },
+      { w: "DIABETES", q: "Disturbio metabolico caracterizado por glicemia elevada" },
+      { w: "INFLAMACAO", q: "Reacao imunologica local a uma agressao ou infeccao" },
+      { w: "GLUCOSE", q: "Principal acucar simples que serve de energia celular" },
+      { w: "NEURONIO", q: "Celula altamente especializada do sistema nervoso" },
+      { w: "COLESTEROL", q: "Composto lipidico essencial membranas mas perigoso em excesso" },
+      { w: "PULMAO", q: "Orgao duplo toracico responsavel pelas trocas gasosas" },
+      { w: "ALERGIA", q: "Resposta imunitaria exagerada a uma substancia inofensiva" },
+      { w: "FRACTURA", q: "Quebra ou descontinuidade estrutural de um osso" },
+      { w: "VACINA", q: "Preparacao imunologica para prevenir doencas infeciosas" }
     ],
     "dificil": [
       { w: "MITOCONDRIA", q: "Organelo celular responsável pela respiração e produção de ATP" },
@@ -324,12 +332,22 @@ const DICIONARIO = {
     "medio": [
       { w: "AGUIA", q: "Ave de rapina dotada de visão extremamente apurada" },
       { w: "CLIMA", q: "Padrão de condições meteorológicas de um local a longo prazo" },
-      { w: "CELULA", q: "A unidade básica estrutural dos seres vivos" }
+      { w: "CELULA", q: "A unidade básica estrutural dos seres vivos" },
+      { w: "HABITAT", q: "Ambiente natural onde uma especie vive e se desenvolve" },
+      { w: "FOSSIL", q: "Resto ou vestigio preservado de um organismo do passado" },
+      { w: "ATMOSFERA", q: "Camada gasosa que envolve e protege um corpo celeste" },
+      { w: "GALAXIA", q: "Grande sistema de estrelas, poeira e materia escura" },
+      { w: "TSUNAMI", q: "Onda gigante gerada por atividade sismica submarina" },
+      { w: "MINERAL", q: "Substancia solida e natural com estrutura cristalina" },
+      { w: "PREDADOR", q: "Animal que caca e mata outros para se alimentar" },
+      { w: "SIMBIOSE", q: "Interacao de longo prazo entre duas especies diferentes" },
+      { w: "FURACAO", q: "Tempestade ciclonica tropical de enorme intensidade" },
+      { w: "EROSAO", q: "Desgaste da superficie terrestre pelas forcas da natureza" }
     ],
     "dificil": [
       { w: "PLUVIOMETRO", q: "Aparelho meteorológico que mede a quantidade de precipitação caída" },
       { w: "EFEMERO", q: "Que tem pouca duração; passageiro como o ciclo de certos insetos" },
-      { w: "BIOLUMINESCENCIA", q: "Produção e emission de luz por parte de um organismo vivo" },
+      { w: "BIOLUMINESCENCIA", q: "Produção e emissão de luz por parte de um organismo vivo" },
       { w: "ENDEMISMO", q: "Fenómeno em que uma espécie ocorre exclusivamente numa região" },
       { w: "ANACRONISMO", q: "Colocação de elementos naturais ou históricos fora da sua era correta" },
       { w: "XEROFITA", q: "Planta adaptada a viver em ambientes com extrema escassez de água" },
@@ -347,7 +365,17 @@ const DICIONARIO = {
     "medio": [
       { w: "LIVRO", q: "Conjunto encadernado de páginas impressas" },
       { w: "REGRA", q: "Preceito ou norma que dita como se deve agir" },
-      { w: "LOGICA", q: "Ramo da filosofia que estuda a validade do raciocínio" }
+      { w: "LOGICA", q: "Ramo da filosofia que estuda a validade do raciocínio" },
+      { w: "CIENCIA", q: "Conhecimento sistematico baseado em observacao e testes" },
+      { w: "CULTURA", q: "Conjunto de habitos, saberes e artes de um povo" },
+      { w: "HISTORIA", q: "Estudo e registo das acoes humanas ao longo do tempo" },
+      { w: "POLITICA", q: "Arte ou ciencia da governacao e organizacao social" },
+      { w: "ECONOMIA", q: "Ciencia que estuda a producao e distribuicao de bens" },
+      { w: "JUSTICA", q: "Principio moral que preconiza a equidade e o direito" },
+      { w: "IMPOSTO", q: "Contribuicao financeira obrigatoria devida ao Estado" },
+      { w: "REPUBLICA", q: "Forma de governo onde o chefe de Estado e eleito" },
+      { w: "CIDADÃO", q: "Individuo no pleno gozo dos seus direitos politicos" },
+      { w: "CONTRATO", q: "Acordo juridico formal entre duas ou mais partes" }
     ],
     "dificil": [
       { w: "PRAGMATICO", q: "Focado nos objetivos práticos, utilidade e resultados reais" },
@@ -374,7 +402,17 @@ const DICIONARIO = {
     "medio": [
       { w: "AUTOR", q: "Criador original de uma obra literária ou artística" },
       { w: "MUSEU", q: "Instituição que preserva, estuda e expõe coleções de valor" },
-      { w: "PINTOR", q: "Artista plástico que se exprime através da cor e formas numa tela" }
+      { w: "PINTOR", q: "Artista plástico que se exprime através da cor e formas numa tela" },
+      { w: "COMEDIA", q: "Peca teatral ou filme com intencao humoristica" },
+      { w: "TRAGEDIA", q: "Drama teatral de cariz grave que evoca a fatalidade" },
+      { w: "ESCULTOR", q: "Artista que modela formas tridimensionais solidas" },
+      { w: "MAESTRO", q: "Diretor ou regente de uma orquestra musical" },
+      { w: "SINFONIA", q: "Composicao musical complexa para grande orquestra" },
+      { w: "GRAVURA", q: "Impressao de um desenho a partir de uma matriz incisa" },
+      { w: "ROMANCE", q: "Narrativa literaria longa em prosa com trama complexa" },
+      { w: "POESIA", q: "Arte de compor textos expressivos com ritmo e rima" },
+      { w: "CRITICA", q: "Analise ponderada e opiniao fundamentada sobre uma obra" },
+      { w: "GALERIA", q: "Espaço comercial ou publico de exposicao de arte" }
     ],
     "dificil": [
       { w: "MELANCOLIA", q: "Tristeza vaga, profunda e permanente; estado de depressão poética" },
@@ -395,7 +433,17 @@ const DICIONARIO = {
     ],
     "medio": [
       { w: "HOTEL", q: "Estabelecimento comercial de alojamento temporário" },
-      { w: "ROTA", q: "Caminho ou itinerário planeado num mapa de viagem" }
+      { w: "ROTA", q: "Caminho ou itinerário planeado num mapa de viagem" },
+      { w: "TURISMO", q: "Atividade de viajar por lazer ou divertimento" },
+      { w: "BAGAGEM", q: "Conjunto de malas e pertences levados na viagem" },
+      { w: "DESTINO", q: "Local fixado para o termo de uma jornada" },
+      { w: "CRUZEIRO", q: "Viagem turistica realizada a bordo de um grande navio" },
+      { w: "POUSADA", q: "Estabelecimento de alojamento tipico ou regional" },
+      { w: "ESTACAO", q: "Local de paragem e embarque de comboios ou autocarros" },
+      { w: "CONVENCÃO", q: "Reuniao ou assembleia internacional de cariz profissional" },
+      { w: "EMBARQUE", q: "Ato de entrar numa aeronave ou navio para viajar" },
+      { w: "MONUMENTO", q: "Obra ou edificio de grande valor historico ou arquitetonico" },
+      { w: "MEMORIAS", q: "Recordacoes ou registos de experiencias vividas num local" }
     ],
     "dificil": [
       { w: "PEREGRINACAO", q: "Jornada longa com propósitos espirituais por terras distantes" },
@@ -415,7 +463,17 @@ const DICIONARIO = {
     "medio": [
       { w: "VIANA", q: "Cidade do Alto Minho conhecida pelo folclore e pelo navio Gil Eannes" },
       { w: "COURA", q: "Rio que banha a vila conhecida pelo seu festival de música alternativo" },
-      { w: "AZULEJO", q: "Placa cerâmica decorativa tradicional na arquitetura lusa" }
+      { w: "AZULEJO", q: "Placa cerâmica decorativa tradicional na arquitetura lusa" },
+      { w: "ALGARVE", q: "Regiao litoral a sul muito procurada pelas praias" },
+      { w: "COIMBRA", q: "Cidade dos estudantes com a universidade mais antiga do pais" },
+      { w: "SARDINHA", q: "Peixe assado obrigatorio nas festas dos Santos Populares" },
+      { w: "MINHO", q: "Regiao verdejante a norte famosa pelo vinho verde" },
+      { w: "DOURO", q: "Rio ladeado por encostas vinhas onde nasce o Porto" },
+      { w: "ROMASTICA", q: "Estilo arquitetonico luso presente na Se Velha de Coimbra" },
+      { w: "CORTIÇA", q: "Produto natural extraido do sobreiro do qual Portugal e lider" },
+      { w: "ALENTEJO", q: "Vasta planicie a sul do Tejo famosa pelo calor e azeite" },
+      { w: "GIRASSOL", q: "Flor cultivada nos campos alentejanos que segue o sol" },
+      { w: "PASTEL", q: "O famoso pastel de Belem ou de nata, doce tipico nacional" }
     ],
     "dificil": [
       { w: "ALVADO", q: "Designação antiga para certas cavidades geológicas ou concavidades" },
