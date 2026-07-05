@@ -123,13 +123,13 @@ button, select, input{ font-family: inherit; }
 .barra-jogo-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .cx-layout{ display:flex; gap:28px; align-items:flex-start; width: 100%; }
-.cx-tabuleiro-wrap{ flex: 0 1 auto; max-width: 100%; overflow-x: auto; background: var(--tinta); padding: 4px; border-radius: 12px; box-shadow: 0 4px 20px var(--sombra-forte); }
-.cx-tabuleiro{ position:relative; display:block; background: var(--tinta); }
+.cx-tabuleiro-wrap{ flex: 1 1 auto; width: 100%; overflow-x: auto; background: var(--tinta); padding: 8px; border-radius: 12px; box-shadow: 0 4px 20px var(--sombra-forte); }
+.cx-tabuleiro{ position:relative; display:block; background: var(--tinta); margin: 0 auto; }
 
-/* Grelha flexível com suporte a toque nativo */
-.cx-grelha{ display:grid; gap:1px; background: var(--tinta); touch-action: manipulation; margin: 0 auto; }
+/* Grelha fluida calculada com base na largura da viewport (vw) */
+.cx-grelha{ display:grid; gap:1px; background: var(--tinta); touch-action: manipulation; margin: 0 auto; width: max-content; max-width: 100%; }
 
-.cx-celula{ width:34px; height:34px; background: var(--branco); position:relative; }
+.cx-celula{ width: 3.2vw; height: 3.2vw; min-width: 26px; min-height: 26px; max-width: 40px; max-height: 40px; background: var(--branco); position:relative; }
 .cx-celula.bloco{ background: var(--tinta); }
 .cx-celula.palavra-activa{ background: var(--ambar-pale); }
 .cx-celula.letra-activa{ background: #E3C58E; }
@@ -144,8 +144,8 @@ button, select, input{ font-family: inherit; }
 .cx-pausa-cobertura{ position:absolute; inset:0; background: rgba(246,240,228,0.98); display:none; flex-direction:column; align-items:center; justify-content:center; gap:12px; z-index:20; }
 .cx-pausa-cobertura.aberta{ display:flex; }
 
-.cx-pistas{ flex:1 1 300px; width: 100%; }
-.cx-grupo-pistas{ margin-bottom:22px; background: var(--branco); border: 2px solid var(--linha); border-radius: 12px; padding: 14px; max-height: 280px; overflow-y: auto; }
+.cx-pistas{ flex:1 1 100%; width: 100%; }
+.cx-grupo-pistas{ margin-bottom:22px; background: var(--branco); border: 2px solid var(--linha); border-radius: 12px; padding: 14px; max-height: 320px; overflow-y: auto; }
 .cx-grupo-titulo{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ambar-dk); margin-bottom:10px; padding-bottom:4px; border-bottom: 2px solid var(--papel-alt); }
 .cx-pista{ padding:6px 8px; font-size:14px; border-radius:6px; cursor:pointer; color: var(--tinta); line-height:1.4; display:flex; gap:8px; align-items:flex-start; }
 .cx-pista:hover{ background: var(--papel); }
@@ -164,18 +164,14 @@ button, select, input{ font-family: inherit; }
 .modal-acoes-col{ flex-direction:column; }
 .modal-acoes-col .btn { width: 100%; justify-content: center; }
 
-/* Adaptação Responsiva Crítica para Enunciados e Telas Verticais (iPad/Android) */
+/* Correção de Layout Crítico para iPad Vertical e Dispositivos Mobile */
 @media (max-width: 1024px) {
-  .cx-layout { flex-direction: column; align-items: center; }
-  .cx-tabuleiro-wrap { width: 100%; display: flex; justify-content: center; }
+  .cx-layout { flex-direction: column; align-items: stretch; gap: 20px; }
+  .cx-tabuleiro-wrap { width: 100%; display: block; overflow-x: auto; }
   .cx-pistas { width: 100%; }
+  .cx-grupo-pistas { max-height: none; height: auto; overflow-y: visible; } /* Liberta o texto para expandir verticalmente sem cortes */
   .barra-jogo { flex-direction: column; align-items: flex-start; gap: 12px; }
   .barra-jogo-acoes { width: 100%; justify-content: flex-start; }
-}
-
-@media (max-width: 480px) {
-  .cx-celula { width: 28px; height: 28px; }
-  .cx-celula input { font-size: 14px; }
 }
 </style>
 </head>
@@ -327,13 +323,13 @@ const DICIONARIO = {
     ],
     "medio": [
       { w: "AGUIA", q: "Ave de rapina dotada de visão extremamente apurada" },
-      { w: "CLIMA", q: "Padrão de conditions meteorológicas de um local a longo prazo" },
+      { w: "CLIMA", q: "Padrão de condições meteorológicas de um local a longo prazo" },
       { w: "CELULA", q: "A unidade básica estrutural dos seres vivos" }
     ],
     "dificil": [
       { w: "PLUVIOMETRO", q: "Aparelho meteorológico que mede a quantidade de precipitação caída" },
       { w: "EFEMERO", q: "Que tem pouca duração; passageiro como o ciclo de certos insetos" },
-      { w: "BIOLUMINESCENCIA", q: "Produção e emissão de luz por parte de um organismo vivo" },
+      { w: "BIOLUMINESCENCIA", q: "Produção e emission de luz por parte de um organismo vivo" },
       { w: "ENDEMISMO", q: "Fenómeno em que uma espécie ocorre exclusivamente numa região" },
       { w: "ANACRONISMO", q: "Colocação de elementos naturais ou históricos fora da sua era correta" },
       { w: "XEROFITA", q: "Planta adaptada a viver em ambientes com extrema escassez de água" },
@@ -588,7 +584,7 @@ const CruzadasUI = (function(){
     });
 
     document.getElementById('btnVerificarCruzadas').addEventListener('click', verificarGrelha);
-    document.getElementById('btnRevelarCruzadas').addEventListener('click', JackRevelar);
+    document.getElementById('btnRevelarCruzadas').addEventListener('click', proporRevelacao);
     
     document.getElementById('btnVoltarCruzadas').addEventListener('click', () => {
       guardarEstadoActual(); pararTemporizador(); irPara('ecraInicio');
@@ -801,7 +797,6 @@ const CruzadasUI = (function(){
     if(grelha[r][c].utilizador === novaLetra){ e.preventDefault(); avancarCursor(r, c); }
   }
 
-  // Tratamento de introdução simplificado para estabilizar layouts webview
   function tratarInsercao(e, r, c){
     if(pausado || revelado || finalizado){ e.target.value = grelha[r][c].utilizador; return; }
     const letra = normalizarLetra(e.target.value.slice(-1));
