@@ -12,9 +12,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Cruzadas Mente Ativa">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link class="apple-touch-icon" href="icon-192.png">
 
-<!-- ═══════════ -->
 <style>
 :root{
   --papel:        #F6F0E4;
@@ -178,7 +177,7 @@ button, select, input{ font-family: inherit; }
     <div class="marca-selo">🧠</div>
     <div class="marca-texto">
       <h1 class="f-display">Mente Ativa</h1>
-      <p>Palavras Cruzadas Dedicadas</p>
+      <p>Desafios de Alto Nível Cognitivo</p>
     </div>
   </div>
   <div class="header-acoes">
@@ -189,8 +188,8 @@ button, select, input{ font-family: inherit; }
 
 <main class="ecra activo" id="ecraInicio">
   <div class="bemvindo">
-    <h2 class="f-display">Puzzles de Palavras Cruzadas</h2>
-    <p>Selecione um dos temas abaixo para iniciar uma grelha estruturada em português de Portugal. Geração dinâmica sem falhas de cruzamento.</p>
+    <h2 class="f-display">Puzzles de Palavras Cruzadas Eruditas</h2>
+    <p>Selecione um tema. O motor reconstrói a grelha dinamicamente com base num dicionário avançado sem interrupções de fluxo.</p>
   </div>
   <div class="grid-temas" id="gridTemas"></div>
 </main>
@@ -206,10 +205,9 @@ button, select, input{ font-family: inherit; }
     </div>
     <div class="barra-jogo-acoes">
       <select class="btn" id="selectNivelCruzadas">
-        <!-- Nível Fácil pré-selecionado por defeito para evitar erros de arranque -->
-        <option value="facil" selected>Fácil</option>
+        <option value="facil">Fácil</option>
         <option value="medio">Médio</option>
-        <option value="dificil">Difícil</option>
+        <option value="dificil" selected>Difícil / Erudito</option>
       </select>
       <button class="btn" id="btnNovoCruzadas">🔀 Novo</button>
       <button class="btn" id="btnVerificarCruzadas">✔️ Verificar</button>
@@ -226,7 +224,7 @@ button, select, input{ font-family: inherit; }
 <div class="modal-fundo" id="modalLimpar">
   <div class="modal">
     <h3 class="f-display">Apagar o progresso local?</h3>
-    <p>Isto irá limpar permanentemente as suas estatísticas e puzzles guardados neste dispositivo.</p>
+    <p>Isto irá limpar permanentemente as suas estatísticas guardadas.</p>
     <div class="modal-acoes">
       <button class="btn" id="btnCancelarLimpar">Cancelar</button>
       <button class="btn btn-perigo" id="btnConfirmarLimpar">Apagar tudo</button>
@@ -237,7 +235,7 @@ button, select, input{ font-family: inherit; }
 <div class="modal-fundo" id="modalConfirmar">
   <div class="modal">
     <h3 class="f-display">Mudar de Puzzle?</h3>
-    <p id="textoConfirmar">O seu progresso na grelha actual será substituído.</p>
+    <p id="textoConfirmar">O progresso da grelha atual será substituído.</p>
     <div class="modal-acoes">
       <button class="btn" id="btnConfirmarNao">Cancelar</button>
       <button class="btn btn-primario" id="btnConfirmarSim">Confirmar</button>
@@ -248,7 +246,7 @@ button, select, input{ font-family: inherit; }
 <div class="modal-fundo" id="modalRevelar">
   <div class="modal">
     <h3 class="f-display">Mostrar soluções?</h3>
-    <p>A grelha será totalmente preenchida e o progresso deste desafio será encerrado.</p>
+    <p>A grelha será totalmente revelada e o progresso atual será encerrado.</p>
     <div class="modal-acoes">
       <button class="btn" id="btnCancelarRevelar">Cancelar</button>
       <button class="btn btn-perigo" id="btnConfirmarRevelar">Revelar tudo</button>
@@ -260,7 +258,7 @@ button, select, input{ font-family: inherit; }
   <div class="modal">
     <div style="font-size:40px; margin-bottom:10px;">🏆</div>
     <h3 class="f-display">Grelha Concluída!</h3>
-    <p id="textoConclusao">Parabéns, desvendou todas as intersecções.</p>
+    <p id="textoConclusao">Parabéns, resolveu todas as intersecções eruditas.</p>
     <div class="modal-acoes modal-acoes-col">
       <button class="btn btn-primario" id="btnConclusaoNovo">🔁 Gerar novo puzzle neste tema</button>
       <button class="btn" id="btnConclusaoMenu">🎲 Voltar à seleção de temas</button>
@@ -280,242 +278,150 @@ const CX_TEMAS = [
   {id:'viagens', nome:'Viagens e Lugares', icone:'✈️', cor:'linear-gradient(155deg, #9A8A5C, #756842)'}
 ];
 
-// O Novo Dicionário Integrado com Lotes Robustos
+// DICIONÁRIO INTEGRADO EXPANDIDO - FOCO EM COMPLEXIDADE ELEVADA
 const DICIONARIO = {
   "saude": {
     "facil": [
       { w: "DENTE", q: "Estrutura dura da boca usada para mastigar" },
-      { w: "BOCA", q: "Cavidade onde se inicia a digestão" },
       { w: "OSSO", q: "Parte rígida do esqueleto" },
       { w: "PELE", q: "O maior órgão do corpo humano" },
       { w: "VEIA", q: "Vaso que transporta o sangue para o coração" },
-      { w: "SANGUE", q: "Líquido vital de cor vermelha" },
-      { w: "CARIE", q: "Lesão estrutural nos dentes" },
-      { w: "FEBRE", q: "Aumento anormal da temperatura corporal" },
-      { w: "TOSSE", q: "Reflexo respiratório comum em constipações" },
-      { w: "VIRUS", q: "Agente infecioso microscópico" },
-      { w: "SALIVA", q: "Líquido aquoso que umedece a cavidade oral" }
+      { w: "SANGUE", q: "Líquido vital de cor vermelha" }
     ],
     "medio": [
       { w: "BUCINADOR", q: "Músculo da bochecha auxiliar na mastigação" },
-      { w: "CLINICA", q: "Espaço dedicado à prestação de cuidados de saúde" },
-      { w: "HIGIENE", q: "Conjunto de práticas de limpeza pessoal" },
-      { w: "PACIENTE", q: "Pessoa sob cuidados médicos ou dentários" },
       { w: "ESMALTE", q: "Camada externa protetora do dente" },
       { w: "GENGIVA", q: "Tecido mole que envolve a base dos dentes" },
       { w: "BIOFILME", q: "Placa bacteriana acumulada nas superfícies" },
-      { w: "RECEITA", q: "Prescrição médica para aviar na farmácia" },
-      { w: "SINTOMA", q: "Sinal indicador de uma doença" },
-      { w: "PAROTIDEO", q: "Ducto que transporta saliva para a boca" },
-      { w: "PULSO", q: "Ritmo do batimento cardíaco sentido no pulso" }
+      { w: "SINTOMA", q: "Sinal indicador de uma patologia" }
     ],
     "dificil": [
+      { w: "MITOCONDRIA", q: "Organelo celular responsável pela respiração e produção de ATP" },
+      { w: "SARCOPLASMA", q: "O citoplasma das células musculares estriadas" },
+      { w: "HOMEOCINESE", q: "Regulação de fluidos corporais para manter o equilíbrio biológico" },
+      { w: "PATOGENESE", q: "Origem e desenvolvimento de uma doença ou processo mórbido" },
+      { w: "ANAFILAXIA", q: "Reação alérgica sistémica grave e potencialmente fatal" },
+      { w: "IDIOPATICO", q: "Diz-se de uma afeição de causa desconhecida ou espontânea" },
+      { w: "VALETUDINARIO", q: "Indivíduo de saúde débil, constantemente doente ou frágil" },
+      { w: "PROSTADO", q: "Sem forças físicas ou morais; profundamente exausto" },
       { w: "ESTERILIZAR", q: "Eliminar totalmente os microrganismos de um instrumento" },
-      { w: "AUTOCLAVE", q: "Aparelho utilizado para esterilização a vapor" },
-      { w: "BIOLOGICO", q: "Tipo de risco associado ao manuseamento de fluidos corporais" },
-      { w: "PATOLOGIA", q: "Ramo da medicina que estuda as doenças" },
-      { w: "DIAGNOSTICO", q: "Determinação de uma doença a partir dos sintomas" },
-      { w: "TRATAMENTO", q: "Conjunto de meios usados para curar uma maleita" },
-      { w: "PREVENCAO", q: "Ato de evitar antecipadamente um problema de saúde" },
-      { w: "RADIOGRAFIA", q: "Imagem do interior do corpo por raios-X" },
-      { w: "ANESTESIA", q: "Técnica para suprimir a dor durante uma intervenção" },
-      { w: "RESIDUOS", q: "Lixo biológico não refrigerado guardado no máximo trinta dias" }
-    ]
-  },
-  "portugal": {
-    "facil": [
-      { w: "PORTO", q: "A cidade Invicta do Norte" },
-      { w: "PRAIA", q: "Faixa de areal costeiro" },
-      { w: "MINHO", q: "Rio que nasce em Espanha e desagua em Caminha" },
-      { w: "FADO", q: "Estilo musical tradicional português" },
-      { w: "TEJO", q: "O maior rio da Península Ibérica" },
-      { w: "GADO", q: "Conjunto de animais criados em pasto" },
-      { w: "GALO", q: "Símbolo tradicional de Barcelos" },
-      { w: "MAR", q: "Vasta extensão de água salgada" },
-      { w: "VINHO", q: "Bebida alcoólica proveniente da uva" },
-      { w: "PADEIRA", q: "A mítica padeira de Aljubarrota" },
-      { w: "CASTELO", q: "Fortificação medieval defensiva" }
-    ],
-    "medio": [
-      { w: "VIANA", q: "___ do Castelo, cidade do Alto Minho" },
-      { w: "DARQUE", q: "Vila situada na margem esquerda do rio Lima" },
-      { w: "LISBOA", q: "Capital de Portugal, a cidade das sete colinas" },
-      { w: "ALGARVE", q: "Região mais a sul de Portugal Continental" },
-      { w: "AZULEJO", q: "Placa de cerâmica decorativa muito usada em Portugal" },
-      { w: "BACALHAU", q: "Peixe muito presente na gastronomia portuguesa" },
-      { w: "SARDINHA", q: "Peixe típico dos Santos Populares" },
-      { w: "LUSITANO", q: "Relativo aos antigos habitantes da Península Ibérica" },
-      { w: "BORDALO", q: "Mestre ceramista e caricaturista português" },
-      { w: "ESTRELA", q: "A serra mais alta de Portugal Continental" },
-      { w: "ALENTEJO", q: "Vasta região a sul do rio Tejo" }
-    ],
-    "dificil": [
-      { w: "TABOAO", q: "Praia fluvial em Paredes de Coura" },
-      { w: "COURA", q: "Rio minhoto e vila famosa pelo festival de música" },
-      { w: "GUIMARAES", q: "A cidade berço da nacionalidade portuguesa" },
-      { w: "MOSTEIRO", q: "Edifício onde habita uma comunidade religiosa" },
-      { w: "DESCOBERTAS", q: "Período histórico de exploração marítima lusa" },
-      { w: "CARAVELA", q: "Embarcação usada nos Descobrimentos Portugueses" },
-      { w: "TARTARUGA", q: "Réptil marinho frequente nos mares dos Açores e Madeira" },
-      { w: "ARQUITETURA", q: "Arte de projetar edifícios, com grande tradição lusa" },
-      { w: "FRANCESINHA", q: "Típica e robusta sanduíche portuense" },
-      { w: "ANDORINHA", q: "Ave migratória símbolo do início da primavera" }
+      { w: "AUTOCLAVE", q: "Aparelho utilizado para esterilização a vapor sob pressão" },
+      { w: "RESIDUOS", q: "Lixo hospitalar ou clínico que exige triagem regulamentada estrita" }
     ]
   },
   "natureza": {
     "facil": [
       { w: "FLOR", q: "Parte reprodutora colorida da planta" },
-      { w: "FOGO", q: "Combustão com libertação de luz e calor" },
-      { w: "ONDA", q: "Ondulação na superfície da água do mar" },
-      { w: "GATO", q: "Felino doméstico altamente ágil" },
       { w: "AGUA", q: "Recurso líquido incolor vital à vida" },
-      { w: "RIO", q: "Curso de água doce natural" },
-      { w: "LAGO", q: "Massa de água doce rodeada por terra" },
-      { w: "VENTO", q: "Movimento natural do ar" },
-      { w: "NEVE", q: "Precipitação de cristais de gelo" },
-      { w: "FOLHA", q: "Parte verde das plantas que capta a luz solar" }
+      { w: "VENTO", q: "Movimento natural do ar atmosférico" }
     ],
     "medio": [
-      { w: "AGUIA", q: "Ave de rapina dotada de visão apurada" },
-      { w: "URSO", q: "Mamífero de grande porte, frequentemente omnívoro" },
-      { w: "FAUNA", q: "O conjunto de animais de uma região" },
-      { w: "FLORA", q: "O conjunto das espécies vegetais" },
-      { w: "ROCHA", q: "Massa sólida de minerais" },
-      { w: "CLIMA", q: "Padrão de condições meteorológicas de um local" },
-      { w: "PLANETA", q: "Corpo celeste que orbita uma estrela" },
-      { w: "FUNGOS", q: "Reino biológico que inclui os cogumelos" },
-      { w: "CELULA", q: "A unidade básica dos seres vivos" },
-      { w: "ATOMO", q: "Unidade básica da matéria" }
+      { w: "AGUIA", q: "Ave de rapina dotada de visão extremamente apurada" },
+      { w: "CLIMA", q: "Padrão de condições meteorológicas de um local a longo prazo" },
+      { w: "CELULA", q: "A unidade básica estrutural dos seres vivos" }
     ],
     "dificil": [
-      { w: "BOSQUE", q: "Agrupamento denso de árvores e arbustos" },
-      { w: "TRILHO", q: "Caminho pedestre muito procurado na natureza" },
-      { w: "CIRCULAR", q: "Tipo de rota que começa e acaba no mesmo ponto" },
-      { w: "FLUVIAL", q: "Relativo a rio, como uma praia de água doce" },
-      { w: "GRAVIDADE", q: "Força de atração entre os corpos com massa" },
-      { w: "EVOLUCAO", q: "Processo de mudança dos organismos ao longo do tempo" },
-      { w: "FOTOSSINTESE", q: "Processo pelo qual as plantas produzem energia" },
-      { w: "ECOSSISTEMA", q: "Comunidade de seres vivos e o seu ambiente" },
-      { w: "BIODIVERSIDADE", q: "A variedade de vida num determinado habitat" },
-      { w: "METEOROLOGIA", q: "Ciência que estuda os fenómenos atmosféricos" }
+      { w: "PLUVIOMETRO", q: "Aparelho meteorológico que mede a quantidade de precipitação caída" },
+      { w: "EFEMERO", q: "Que tem pouca duração; passageiro como o ciclo de certos insetos" },
+      { w: "BIOLUMINESCENCIA", q: "Produção e emissão de luz por parte de um organismo vivo" },
+      { w: "ENDEMISMO", q: "Fenómeno em que uma espécie ocorre exclusivamente numa região" },
+      { w: "ANACRONISMO", q: "Colocação de elementos naturais ou históricos fora da sua era correta" },
+      { w: "XEROFITA", q: "Planta adaptada a viver em ambientes com extrema escassez de água" },
+      { w: "CONFLUENCIA", q: "Ponto de junção ou encontro de duas correntes de água ou rios" },
+      { w: "FOTOSSINTESE", q: "Processo bioquímico pelo qual as plantas convertem luz em energia" },
+      { w: "ECOSSISTEMA", q: "Complexo dinâmico de comunidades vegetais, animais e o seu ambiente" }
     ]
   },
   "geral": {
     "facil": [
-      { w: "LOTO", q: "Jogo popular de sorte com números" },
-      { w: "VILA", q: "Povoação de dimensão superior a uma aldeia" },
-      { w: "ALTO", q: "Elevado, o oposto de baixo" },
-      { w: "NETO", q: "O filho do próprio filho ou filha" },
-      { w: "JOGO", q: "Atividade lúdica sujeita a regras" },
-      { w: "RODA", q: "Objeto circular que gira num eixo" },
-      { w: "CASA", q: "Edifício destinado a habitação" },
-      { w: "MESA", q: "Móvel onde se servem as refeições" },
-      { w: "RUA", q: "Via pública ladeada por edifícios" },
-      { w: "LUZ", q: "Radiação eletromagnética visível" }
+      { w: "JOGO", q: "Atividade lúdica sujeita a regras estruturadas" },
+      { w: "CASA", q: "Edifício destinado a habitação humana" },
+      { w: "LUZ", q: "Radiação eletromagnética visível pelo olho" }
     ],
     "medio": [
       { w: "LIVRO", q: "Conjunto encadernado de páginas impressas" },
-      { w: "LUPA", q: "Lente utilizada para ampliar objetos" },
-      { w: "VOTO", q: "Expressão de escolha num escrutínio" },
-      { w: "RATO", q: "Pequeno roedor ou periférico de computador" },
-      { w: "POTE", q: "Recipiente bojudo vulgarmente de barro" },
-      { w: "LETRA", q: "Símbolo gráfico de um alfabeto" },
-      { w: "REGRA", q: "Preceito que dita como se deve agir" },
-      { w: "DADOS", q: "Poliedros rolados em jogos de sorte ou RPGs" },
-      { w: "MAGIA", q: "Arte de produzir efeitos sobrenaturais ilusórios" },
-      { w: "ESPADA", q: "Arma branca composta por uma lâmina longa" }
+      { w: "REGRA", q: "Preceito ou norma que dita como se deve agir" },
+      { w: "LOGICA", q: "Ramo da filosofia que estuda a validade do raciocínio" }
     ],
     "dificil": [
-      { w: "ESTUDO", q: "Ato de procurar ativamente novos conhecimentos" },
-      { w: "EXAME", q: "Avaliação formal de um conhecimento" },
-      { w: "TEMA", q: "Assunto sobre o qual incide um debate" },
-      { w: "XAROPE", q: "Líquido espesso, frequentemente medicinal" },
-      { w: "MEMORIA", q: "Faculdade de reter e recuperar informações" },
-      { w: "TREINO", q: "Preparação física ou mental metódica" },
-      { w: "LOGICA", q: "Ramo da filosofia que estuda o raciocínio válido" },
-      { w: "FILOSOFIA", q: "Estudo de questões fundamentais sobre a existência" },
-      { w: "CONHECIMENTO", q: "Informação e compreensão adquiridas" },
-      { w: "COGNITIVO", q: "Relativo ao processamento de informação no cérebro" }
+      { w: "PRAGMATICO", q: "Focado nos objetivos práticos, utilidade e resultados reais" },
+      { w: "RESILIENCIA", q: "Capacidade de superar a adversidade e adaptar-se à mudança" },
+      { w: "NEPOTISMO", q: "Favorecimento ilegal de familiares ou amigos em cargos de poder" },
+      { w: "IDOSSINCRASIA", q: "Disposição temperamental ou característica peculiar de um indivíduo" },
+      { w: "PEREMPTORIO", q: "Decisivo, categórico e que não permite réplica ou contestação" },
+      { w: "HEGEMONIA", q: "Supremacia ou soberania política e económica de um Estado sobre outros" },
+      { w: "AMBIVALENTE", q: "Que apresenta dois valores distintos ou sentimentos opostos em simultâneo" },
+      { w: "TERGIVERSAR", q: "Utilizar subterfúgios ou evasivas; hesitar, não ir direto ao assunto" },
+      { w: "PARADOXO", q: "Contradição aparente que desafia as leis da lógica tradicional" },
+      { w: "LOGRIFICO", q: "Que tem o caráter de um enigma difícil; obscuro ou indecifrável" },
+      { w: "JUXTAPOSTO", q: "Colocado imediatamente ao lado de outra coisa, sem interposição" },
+      { w: "FASTIDIOSO", q: "Que causa tédio ou contrariedade; profundamente aborrecido" },
+      { w: "SINECURA", q: "Cargo altamente rendoso que exige muito pouco ou nenhum trabalho" }
     ]
   },
   "artes": {
     "facil": [
-      { w: "POEMA", q: "Construção literária em versos" },
-      { w: "PENA", q: "Utensílio de escrita ancestral" },
-      { w: "ERRO", q: "Falha num texto que precisa de revisão" },
-      { w: "NORA", q: "Mecanismo para tirar água de poços" },
-      { w: "ARTE", q: "Expressão criativa humana" },
-      { w: "TELA", q: "Superfície onde o pintor aplica as tintas" },
-      { w: "COR", q: "Perceção visual desencadeada pela luz" },
-      { w: "SOM", q: "Vibração acústica percebida pelo ouvido" },
-      { w: "TOM", q: "Grau de elevação de um som musical" },
-      { w: "RIMA", q: "Repetição de sons no final dos versos" }
+      { w: "POEMA", q: "Construção literária geralmente estruturada em versos" },
+      { w: "ARTE", q: "Expressão criativa ou estética humana" },
+      { w: "TELA", q: "Superfície de tecido onde o pintor aplica as tintas" }
     ],
     "medio": [
-      { w: "OBRA", q: "Trabalho artístico completo de um autor" },
-      { w: "OITO", q: "O número que se segue ao sete" },
-      { w: "REI", q: "Monarca presente em tragédias clássicas" },
-      { w: "IDEIA", q: "O embrião criativo na mente do artista" },
-      { w: "AUTOR", q: "Criador de uma obra literária ou artística" },
-      { w: "PINTOR", q: "Artista que se exprime através de quadros" },
-      { w: "MURAL", q: "Pintura executada diretamente numa parede" },
-      { w: "TEATRO", q: "Arte de representar uma história perante um público" },
-      { w: "PALCO", q: "Estrado onde os atores se apresentam" },
-      { w: "MUSEU", q: "Instituição que preserva e expõe coleções" }
+      { w: "AUTOR", q: "Criador original de uma obra literária ou artística" },
+      { w: "MUSEU", q: "Instituição que preserva, estuda e expõe coleções de valor" },
+      { w: "PINTOR", q: "Artista plástico que se exprime através da cor e formas numa tela" }
     ],
     "dificil": [
-      { w: "CENA", q: "Parte em que se subdivide um ato teatral" },
-      { w: "CORO", q: "Grupo musical de canto coletivo num palco" },
-      { w: "NOTA", q: "Sinal gráfico que representa um som musical" },
-      { w: "ROTA", q: "O caminho percorrido por uma narrativa" },
-      { w: "LITERATURA", q: "Arte de compor e escrever textos" },
-      { w: "ESCULTURA", q: "Arte de criar formas tridimensionais" },
-      { w: "ARQUITETURA", q: "Arte de projetar edifícios e espaços" },
-      { w: "PERSPECTIVA", q: "Técnica de representar profundidade numa tela" },
-      { w: "RENASCIMENTO", q: "Período cultural de redescoberta da antiguidade" },
-      { w: "DRAMATURGO", q: "Escritor de peças de teatro" }
+      { w: "MELANCOLIA", q: "Tristeza vaga, profunda e permanente; estado de depressão poética" },
+      { w: "QUIMERICO", q: "Que é produto da imaginação pura; utópico, fantástico, ilusório" },
+      { w: "VICISSITUDE", q: "Sucessão de mudanças ou alternâncias; instabilidade da sorte" },
+      { w: "ESTOICO", q: "Que mostra firmeza e impassibilidade perante a dor ou o sofrimento" },
+      { w: "DENEGRIR", q: "Manchar a reputação, valor ou beleza de uma obra ou indivíduo" },
+      { w: "ALTANEIRO", q: "Que voa muito alto; por extensão, soberbo, orgulhoso ou altivo" },
+      { w: "ONIRICO", q: "Relativo aos sonhos ou que tem o caráter vago e fantástico destes" },
+      { w: "DRAMATURGO", q: "Escritor especializado na composição de peças de teatro" },
+      { w: "RENASCIMENTO", q: "Período cultural europeu de redescoberta artística da antiguidade clássica" }
     ]
   },
   "viagens": {
     "facil": [
-      { w: "MALAS", q: "Utensílios de transporte de pertences" },
-      { w: "MAPA", q: "Representação cartográfica de rotas" },
-      { w: "LUAS", q: "Satélites ou ciclos lunares contados" },
-      { w: "PULO", q: "Salto ou etapa muito curta da viagem" },
-      { w: "VOO", q: "Ato de viajar de avião" },
-      { w: "TREM", q: "Meio de transporte que circula em carris (Br)" },
-      { w: "GUIA", q: "Pessoa ou livro que orienta o percurso" },
-      { w: "RUA", q: "Caminho público numa povoação" },
-      { w: "VIA", q: "Caminho, estrada ou percurso" },
-      { w: "PAIS", q: "Território delimitado por fronteiras" }
+      { w: "MAPA", q: "Representação cartográfica de um terreno ou rotas" },
+      { w: "VOO", q: "Ato ou efeito de viajar por meio de aeronave" }
     ],
     "medio": [
-      { w: "GIRO", q: "Passeio rápido e agradável (coloquial)" },
-      { w: "IATE", q: "Embarcação luxuosa de recreio" },
-      { w: "ROTA", q: "Caminho planeado num mapa" },
-      { w: "HOTEL", q: "Estabelecimento de alojamento temporário" },
-      { w: "PONTE", q: "Construção que liga duas margens" },
-      { w: "BARCO", q: "Veículo para navegar na água" },
-      { w: "BILHETE", q: "Documento comprovativo de pagamento de passagem" },
-      { w: "METRO", q: "Transporte ferroviário urbano subterrâneo" },
-      { w: "MUSEU", q: "Local de interesse cultural numa viagem" },
-      { w: "MOCHILA", q: "Saco prático transportado às costas" }
+      { w: "HOTEL", q: "Estabelecimento comercial de alojamento temporário" },
+      { w: "ROTA", q: "Caminho ou itinerário planeado num mapa de viagem" }
     ],
     "dificil": [
-      { w: "HORA", q: "Unidade de tempo crítica para não perder o voo" },
-      { w: "TEMA", q: "O propósito cultural principal da viagem" },
-      { w: "REMA", q: "Movimento feito em passeios náuticos braçais" },
-      { w: "AEROPORTO", q: "Infraestrutura para a aterragem de aviões" },
-      { w: "PASSAPORTE", q: "Documento oficial necessário para viajar além-fronteiras" },
-      { w: "FRONTEIRA", q: "Linha limite entre dois Estados" },
-      { w: "CONTINENTE", q: "Grande extensão contínua de terra" },
-      { w: "EXPEDICAO", q: "Viagem organizada com fins científicos ou de exploração" },
-      { w: "ITINERARIO", q: "Programa detalhado de uma viagem" },
-      { w: "CRUZEIRO", q: "Viagem turística de barco com várias paragens" }
+      { w: "PEREGRINACAO", q: "Jornada longa com propósitos espirituais por terras distantes" },
+      { w: "ITINERANTE", q: "Que se desloca continuamente de um lugar para o outro sem paragem fixa" },
+      { w: "MEANDROS", q: "Sinuosidades ou curvas acentuadas de um rio ou caminho tortuoso" },
+      { w: "EXOTICO", q: "Que provém de país estrangeiro; que causa fascínio pelo ineditismo" },
+      { w: "TOPOGRAFIA", q: "Descrição detalhada e geométrica do relevo de uma região" },
+      { w: "EXPEDICAO", q: "Viagem organizada com fins científicos, militares ou de exploração" },
+      { w: "PASSAPORTE", q: "Documento oficial de identidade exigido para trânsito internacional" }
+    ]
+  },
+  "portugal": {
+    "facil": [
+      { w: "FADO", q: "Estilo musical melancólico tradicional português" },
+      { w: "TEJO", q: "O maior rio em extensão na Península Ibérica" }
+    ],
+    "medio": [
+      { w: "VIANA", q: "Cidade do Alto Minho conhecida pelo folclore e pelo navio Gil Eannes" },
+      { w: "COURA", q: "Rio que banha a vila conhecida pelo seu festival de música alternativo" },
+      { w: "AZULEJO", q: "Placa cerâmica decorativa tradicional na arquitetura lusa" }
+    ],
+    "dificil": [
+      { w: "ALVADO", q: "Designação antiga para certas cavidades geológicas ou concavidades" },
+      { w: "DILIGENCIA", q: "Antiga carruagem de transporte público interurbano de malas postais" },
+      { w: "SOBRANCEIRO", q: "Que está situado num plano superior; elevado, que domina a paisagem" },
+      { w: "LUSITANIDADE", q: "Conjunto dos traços culturais e identitários do povo português" },
+      { w: "MANUELINO", q: "Estilo arquitetónico e ornamental marcadamente português d'el-rei D. Manuel I" },
+      { w: "FRANCESINHA", q: "Iguaria gastronómica portuense composta por carnes, queijo e molho picante" },
+      { w: "GUIMARAES", q: "Cidade berço de Portugal, associada à fundação da nacionalidade por D. Afonso Henriques" }
     ]
   }
 };
-
 
 const ARMAZEM = {
   CHAVE: 'cruzadas_pwa_save',
@@ -524,34 +430,29 @@ const ARMAZEM = {
   limpar(){ try{ localStorage.removeItem(this.CHAVE); }catch(e){} }
 };
 
-// Algoritmo Gerador Dinâmico
 const MotorGrelhas = {
-  gerar(listaPalavras, maxPalavras = 5) {
+  gerar(listaPalavras, maxPalavras = 6) {
     if(!listaPalavras || listaPalavras.length === 0) return null;
     
-    // Baralha a lista para puzzles únicos
     let candidatas = [...listaPalavras].sort(() => 0.5 - Math.random()).slice(0, maxPalavras);
-    candidatas.sort((a, b) => b.w.length - a.w.length); // Maiores primeiro
+    candidatas.sort((a, b) => b.w.length - a.w.length);
     
-    let grelhaTemp = Array(30).fill(null).map(() => Array(30).fill('.'));
+    let grelhaTemp = Array(40).fill(null).map(() => Array(40).fill('.'));
     let palavrasColocadas = [];
     
-    // Coloca a 1ª palavra no centro
     const p1 = candidatas[0];
-    const rInicial = 15;
-    const cInicial = 15 - Math.floor(p1.w.length / 2);
+    const rInicial = 20;
+    const cInicial = 20 - Math.floor(p1.w.length / 2);
     
     for(let i = 0; i < p1.w.length; i++) grelhaTemp[rInicial][cInicial + i] = p1.w[i];
     palavrasColocadas.push({ w: p1.w, q: p1.q, r: rInicial, c: cInicial, d: 'H' });
     
-    // Tenta cruzar as restantes
     for(let i = 1; i < candidatas.length; i++) {
       let pAlvo = candidatas[i];
       let colocada = false;
       
       for(let pc of palavrasColocadas) {
         if(colocada) break;
-        // Procura letras em comum
         for(let j = 0; j < pAlvo.w.length; j++) {
           if(colocada) break;
           let letra = pAlvo.w[j];
@@ -575,11 +476,12 @@ const MotorGrelhas = {
       }
     }
     
+    if(palavrasColocadas.length < 2) return null;
     return this.recortarGrelha(grelhaTemp, palavrasColocadas);
   },
   
   podeColocar(grelha, palavra, r, c, d) {
-    if(r < 0 || c < 0 || (d === 'H' && c + palavra.length >= 30) || (d === 'V' && r + palavra.length >= 30)) return false;
+    if(r < 0 || c < 0 || (d === 'H' && c + palavra.length >= 40) || (d === 'V' && r + palavra.length >= 40)) return false;
     
     for(let i = 0; i < palavra.length; i++) {
       let rAtual = d === 'H' ? r : r + i;
@@ -589,16 +491,15 @@ const MotorGrelhas = {
       let rDir = d === 'H' ? rAtual + 1 : rAtual;
       let cDir = d === 'H' ? cAtual : cAtual + 1;
       
-      // Se já tem uma letra, tem de ser igual
       if(grelha[rAtual][cAtual] !== '.' && grelha[rAtual][cAtual] !== palavra[i]) return false;
       
-      // Se a casa está vazia, as casas adjacentes perpendiculares também têm de estar vazias (para não colar noutras palavras)
       if(grelha[rAtual][cAtual] === '.') {
-        if(rEsq >= 0 && cEsq >= 0 && grelha[rEsq][cEsq] !== '.') return false;
-        if(rDir < 30 && cDir < 30 && grelha[rDir][cDir] !== '.') return false;
+        if(rEsq >= 0 && cEsq >= 0 && grelha[rEsq][cEsq] !== '.' && d === 'H') return false;
+        if(rDir < 40 && cDir < 40 && grelha[rDir][cDir] !== '.' && d === 'H') return false;
+        if(rEsq >= 0 && cEsq >= 0 && grelha[rEsq][cEsq] !== '.' && d === 'V') return false;
+        if(rDir < 40 && cDir < 40 && grelha[rDir][cDir] !== '.' && d === 'V') return false;
       }
       
-      // Verificar extremos da palavra
       if(i === 0) {
         let rAtras = d === 'H' ? rAtual : rAtual - 1;
         let cAtras = d === 'H' ? cAtual - 1 : cAtual;
@@ -607,16 +508,16 @@ const MotorGrelhas = {
       if(i === palavra.length - 1) {
         let rFrente = d === 'H' ? rAtual : rAtual + 1;
         let cFrente = d === 'H' ? cAtual + 1 : cAtual;
-        if(rFrente < 30 && cFrente < 30 && grelha[rFrente][cFrente] !== '.') return false;
+        if(rFrente < 40 && cFrente < 40 && grelha[rFrente][cFrente] !== '.') return false;
       }
     }
     return true;
   },
   
   recortarGrelha(grelhaTemp, palavras) {
-    let minR = 30, maxR = 0, minC = 30, maxC = 0;
-    for(let r = 0; r < 30; r++) {
-      for(let c = 0; c < 30; c++) {
+    let minR = 40, maxR = 0, minC = 40, maxC = 0;
+    for(let r = 0; r < 40; r++) {
+      for(let c = 0; c < 40; c++) {
         if(grelhaTemp[r][c] !== '.') {
           minR = Math.min(minR, r); maxR = Math.max(maxR, r);
           minC = Math.min(minC, c); maxC = Math.max(maxC, c);
@@ -624,7 +525,6 @@ const MotorGrelhas = {
       }
     }
     
-    // Ajustar as coordenadas das palavras ao novo corte
     const palavrasAjustadas = palavras.map(p => ({
       ...p, r: p.r - minR, c: p.c - minC
     }));
@@ -653,9 +553,9 @@ const CruzadasUI = (function(){
       <button class="cartao-tema" data-idx="${idx}">
         <div class="cartao-selo" style="background:${t.cor}">${t.icone}</div>
         <h3 class="f-display">${t.nome}</h3>
-        <p>Grelhas com cálculo dinâmico de intersecções sem falhas de espaços mortos.</p>
+        <p>Grelhas com cálculo de intersecções sem falhas estruturais.</p>
         <div class="cartao-rodape">
-          <span class="pill-progresso">Disponível</span>
+          <span class="pill-progresso">Erudito Pronto</span>
         </div>
       </button>
     `).join('');
@@ -704,19 +604,21 @@ const CruzadasUI = (function(){
 
   function abrirDesafio(temaIdx, nivel){
     const tema = CX_TEMAS[temaIdx];
-    
-    // Usa a variável DICIONARIO local
     const listaPalavrasTema = DICIONARIO[tema.id][nivel] || [];
     
     if(listaPalavrasTema.length === 0) {
-      lancarToast('Ainda não existem palavras configuradas para este tema/nível.', 'erro');
+      lancarToast('Não existem palavras configuradas para este nível.', 'erro');
       return;
     }
 
-    const dimensoes = MotorGrelhas.gerar(listaPalavrasTema, 5); // Tenta cruzar 5 palavras
+    let dimensoes = MotorGrelhas.gerar(listaPalavrasTema, 6);
     
     if(!dimensoes) {
-      lancarToast('Não foi possível gerar um puzzle viável com as palavras atuais. Tente de novo.', 'erro');
+      dimensoes = MotorGrelhas.gerar(listaPalavrasTema, 4);
+    }
+
+    if(!dimensoes) {
+      lancarToast('Erro ao intersetar a matriz. Tente de novo.', 'erro');
       return;
     }
 
@@ -772,7 +674,7 @@ const CruzadasUI = (function(){
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <div class="f-corpo" style="display:flex; gap:16px; font-size:14px; color:var(--tinta-suave);">
           <span>⏱️ <b id="cxTimer">00:00</b></span>
-          <span>✓ <b id="cxFeitas">0</b>/<b id="cxTotal">0</b> intersecções</span>
+          <span>✓ <b id="cxFeitas">0</b>/<b id="cxTotal">0</b> palavras</span>
         </div>
         <button class="btn btn-fantasma" id="btnPausaCruzadas">⏸️ Pausa</button>
       </div>
@@ -782,7 +684,7 @@ const CruzadasUI = (function(){
             <div class="cx-grelha" id="cxGrelha"></div>
             <div class="cx-pausa-cobertura" id="cxPausaCobertura">
               <div style="font-size:32px;">⏸️</div><div class="f-display" style="font-size:16px;">Grelha Ocultada</div>
-              <button class="btn btn-primario" id="btnContinuarCruzadas">▶️ Retomar desafio</button>
+              <button class="btn btn-primario" id="btnContinuarCruzadas">▶️ Retomar</button>
             </div>
           </div>
         </div>
@@ -886,14 +788,14 @@ const CruzadasUI = (function(){
     if(pausado || revelado || finalizado) return;
     if(e.isComposing) return; const txt = e.data; if(!txt) return;
     const novaLetra = normalizarLetra(txt.slice(-1)); if(!novaLetra) return;
-    if(grelha[r][c].utilizador === novaLetra){ e.preventDefault(); tratarConclusaoInstantanea(r, c); avancarCursor(r, c); }
+    if(grelha[r][c].utilizador === novaLetra){ e.preventDefault(); avancarCursor(r, c); }
   }
 
   function tratarInsercao(e, r, c){
     if(pausado || revelado || finalizado){ e.target.value = grelha[r][c].utilizador; return; }
     const letra = normalizarLetra(e.target.value.slice(-1));
     e.target.value = letra; grelha[r][c].utilizador = letra;
-    sincronizarConformidadePistas(); actualizarMetricas(); tratarConclusaoInstantanea(r, c); verificarFimDeJogo();
+    sincronizarConformidadePistas(); actualizarMetricas(); verificarFimDeJogo();
     if(letra && !finalizado) avancarCursor(r, c);
   }
 
@@ -917,13 +819,6 @@ const CruzadasUI = (function(){
     if(e.key === 'ArrowLeft'){ e.preventDefault(); direccao = 'H'; recuarCursor(r, c); }
     if(e.key === 'ArrowDown'){ e.preventDefault(); direccao = 'V'; avancarCursor(r, c); }
     if(e.key === 'ArrowUp'){ e.preventDefault(); direccao = 'V'; recuarCursor(r, c); }
-  }
-
-  function tratarConclusaoInstantanea(r, c){
-    const w = obterPalavraNaPosicao(r, c, direccao);
-    if(w && estaCompletada(w)){
-      obterCelulasDaPalavra(w).forEach(([rr, cc]) => { const div = obterDiv(rr, cc); if(div){ div.classList.remove('flash-palavra'); void div.offsetWidth; div.classList.add('flash-palavra'); } });
-    }
   }
 
   function actualizarPistasLayout(){
@@ -978,8 +873,8 @@ const CruzadasUI = (function(){
         if(cel.utilizador === cel.resposta){ certas++; div.classList.add('certo'); } else { erradas++; div.classList.add('errado'); }
       }
     }
-    if(!certas && !erradas){ lancarToast('Preencha pelo menos uma letra antes de verificar.', 'erro'); return; }
-    lancarToast(erradas === 0 ? `Excelente! ${certas} letras validadas.` : `${certas} corretas · ${erradas} incorretas.`, erradas > 0 ? 'erro' : 'sucesso');
+    if(!certas && !erradas){ lancarToast('Preencha letras antes de validar.', 'erro'); return; }
+    lancarToast(erradas === 0 ? `Excelente! ${certas} corretas.` : `${certas} corretas e ${erradas} incorretas.`, erradas > 0 ? 'erro' : 'sucesso');
     setTimeout(() => { document.querySelectorAll('.cx-celula').forEach(el => el.classList.remove('certo', 'errado')); realcarInterface(); }, 2000);
   }
 
@@ -1026,7 +921,6 @@ function lancarToast(msg, tipo){
   setTimeout(() => t.classList.remove('mostrar'), 3000);
 }
 function normalizarLetra(c){ return (c||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z]/g,''); }
-function normalizarPalavra(p){ return (p||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z]/g,''); }
 
 document.addEventListener('DOMContentLoaded', () => { CruzadasUI.inicializar(); document.getElementById('botaoMarca').onclick = () => irPara('ecraInicio'); });
 </script>

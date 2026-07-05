@@ -1,7 +1,7 @@
 {
-  "name": "Palavras Cruzadas — Estímulo Mental",
-  "short_name": "Cruzadas",
-  "description": "Desafios de palavras cruzadas em português de Portugal para manter a mente ativa. Funciona offline.",
+  "name": "Palavras Cruzadas — Mente Ativa",
+  "short_name": "Mente Ativa",
+  "description": "Desafios eruditos e avançados de palavras cruzadas em português de Portugal para manter a mente ativa.",
   "start_url": "/menteativa-cruzadas/index.html",
   "scope": "/menteativa-cruzadas/",
   "display": "standalone",
