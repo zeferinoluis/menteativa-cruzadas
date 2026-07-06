@@ -1,5 +1,5 @@
 // sw.js
-const CACHE_NAME = "menteativa-cruzadas-v32";
+const CACHE_NAME = "menteativa-cruzadas-v27";
 const ASSETS = [
   "./",
   "./index.html",
