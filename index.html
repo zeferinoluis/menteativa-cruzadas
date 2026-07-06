@@ -411,13 +411,13 @@ const DICIONARIO = {
       { w: "PRAGMATICO", q: "Focado nos objetivos práticos, utilidade e resultados reais" },
       { w: "RESILIENCIA", q: "Capacidade de superar a adversidade e adaptar-se à mudança" },
       { w: "NEPOTISMO", q: "Favorecimento ilegal de familiares ou amigos em cargos de poder" },
-      { w: "IDIOSSINCRASIA", q: "Disposição temperamental ou característica peculiar de um indivíduo" },
+      { w: "IDOSSINCRASIA", q: "Disposição temperamental ou característica peculiar de um indivíduo" },
       { w: "PEREMPTORIO", q: "Decisivo, categórico e que não permite réplica ou contestação" },
       { w: "HEGEMONIA", q: "Supremacia ou soberania política e económica de um Estado sobre outros" },
       { w: "AMBIVALENTE", q: "Que apresenta dois valores distintos ou sentimentos opostos em simultâneo" },
       { w: "TERGIVERSAR", q: "Utilizar subterfúgios ou evasivas; hesitar, não ir direto ao assunto" },
       { w: "PARADOXO", q: "Contradição aparente que desafia as leis da lógica tradicional" },
-      { w: "LOGOGRIFICO", q: "Relativo a logogrifo; que tem o caráter de um enigma ou jogo de palavras difícil" }, // <-- Corrigido aqui
+      { w: "LOGOGRIFICO", q: "Relativo a logogrifo; que tem o caráter de um enigma ou jogo de palavras difícil" },
       { w: "JUSTAPOSTO", q: "Colocado imediatamente ao lado de outra coisa, sem interposição" },
       { w: "FASTIDIOSO", q: "Que causa tédio ou contrariedade; profundamente aborrecido" },
       { w: "SINECURA", q: "Cargo altamente rendoso que exige muito pouco ou nenhum trabalho" }
@@ -449,7 +449,7 @@ const DICIONARIO = {
       { w: "ESCULTURA", q: "Arte de modelar ou talhar formas tridimensionais" },
       { w: "PIGMENTO", q: "Substância que confere cor a uma tinta" },
       { w: "RITMO", q: "Cadência ou movemento regular numa composição" },
-      { w: "CENARIO", q: "Conjunto de elementos que representam o ambiente" },
+      { w: "CENARIO", q: "Conjunto de elements que representam o ambiente" },
       { w: "PARTITURA", q: "Documento onde se escreve a música" },
       { w: "MUSEOLOGIA", q: "Estudo e gestão de museus e coleções" },
       { w: "TEATRO", q: "Arte de representar histórias no palco" }
@@ -486,9 +486,7 @@ const DICIONARIO = {
       { w: "MEMORIAS", q: "Recordacoes ou registos de experiencias vividas num local" },
       { w: "ITINERARIO", q: "Plano detalhado de um percurso de viagem" },
       { w: "FRONTEIRA", q: "Linha que separa dois territórios ou países" },
-      { w: "TURISMO", q: "Deslocação de pessoas por lazer ou cultura" },
       { w: "AEROPORTO", q: "Infraestrutura para operações de aeronaves" },
-      { w: "BAGAGEM", q: "Conjunto de volumes transportados pelo viajante" },
       { w: "PASSAPORTE", q: "Documento para identificação internacional" },
       { w: "AVENTURA", q: "Experiência que envolve risco ou novidade" },
       { w: "ALOJAMENTO", q: "Local temporário onde se reside na viagem" },
@@ -501,8 +499,7 @@ const DICIONARIO = {
       { w: "MEANDROS", q: "Sinuosidades ou curvas acentuadas de um rio ou caminho tortuoso" },
       { w: "EXOTICO", q: "Que provém de país estrangeiro; que causa fascínio pelo ineditismo" },
       { w: "TOPOGRAFIA", q: "Descrição detalhada e geométrica do relevo de uma região" },
-      { w: "EXPEDICAO", q: "Viagem organizada com fins científicos, militares ou de exploração" },
-      { w: "PASSAPORTE", q: "Documento oficial de identidade exigido para trânsito internacional" }
+      { w: "EXPEDICAO", q: "Viagem organizada com fins científicos, militares ou de exploração" }
     ]
   },
   "portugal": {
@@ -523,7 +520,7 @@ const DICIONARIO = {
       { w: "CORTIÇA", q: "Produto natural extraido do sobreiro do qual Portugal e lider" },
       { w: "ALENTEJO", q: "Vasta planicie a sul do Tejo famosa pelo calor e azeite" },
       { w: "GIRASSOL", q: "Flor cultivada nos campos alentejanos que segue o sol" },
-      { w: "PASTEL", q: "O famoso pastel de Belem ou de nata, doce tipico nacional" },
+      { w: "PASTEL", q: "O famous pastel de Belem ou de nata, doce tipico nacional" },
       { w: "CARAVELA", q: "Navio da Era dos Descobrimentos" },
       { w: "HISTORIA", q: "Estudo do passado, essencial para entender Portugal" },
       { w: "FOLCLORE", q: "Tradições populares, danças e cantares" },
@@ -1051,7 +1048,19 @@ function lancarToast(msg, tipo){
 }
 function normalizarLetra(c){ return (c||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z]/g,''); }
 
-document.addEventListener('DOMContentLoaded', () => { CruzadasUI.inicializar(); document.getElementById('botaoMarca').onclick = () => irPara('ecraInicio'); });
+document.addEventListener('DOMContentLoaded', () => { 
+  CruzadasUI.inicializar(); 
+  document.getElementById('botaoMarca').onclick = () => irPara('ecraInicio'); 
+
+  // Ativação robusta do Service Worker para suporte PWA offline
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker registado com sucesso:', reg.scope))
+        .catch(err => console.error('Falha ao registar o Service Worker:', err));
+    });
+  }
+});
 </script>
 </body>
 </html>
