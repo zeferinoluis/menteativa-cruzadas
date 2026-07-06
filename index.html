@@ -37,11 +37,13 @@
 
 *{ box-sizing: border-box; }
 html, body{
-  margin:0; padding:0; min-height:100%;
+  margin:0; padding:0; 
+  height: 100vh; width: 100vw;
   background: var(--papel);
   color: var(--tinta);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  overflow-x: hidden;
+  overflow: hidden; /* Corta qualquer scroll na raiz do documento */
+  position: fixed; /* Evita o bounce elástico do iOS a nível global */
 }
 
 .f-display{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight:700; letter-spacing:-0.01em; }
@@ -57,11 +59,12 @@ button, select, input{ font-family: inherit; }
 }
 
 .app-header{
-  position: sticky; top:0; z-index: 50;
+  position: relative; z-index: 50;
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; padding: 14px 22px;
   background: var(--papel);
   border-bottom: 2px solid var(--linha);
+  height: 74px; /* Altura fixa para cálculo do viewport útil */
 }
 .marca{
   display:flex; align-items:center; gap:12px;
@@ -94,7 +97,16 @@ button, select, input{ font-family: inherit; }
 .btn.btn-fantasma{ background: transparent; border-color: transparent; color: var(--tinta-suave); padding:8px 12px; }
 .btn.btn-fantasma:hover:not(:disabled){ background: var(--papel-alt); color: var(--tinta); }
 
-.ecra{ display:none; max-width:1200px; margin: 0 auto; padding: 24px 22px 60px; }
+/* Os ecrãs passam a ser contentores isolados com scroll independente */
+.ecra{ 
+  display:none; 
+  max-width:1200px; 
+  margin: 0 auto; 
+  padding: 24px 22px 60px;
+  height: calc(100vh - 74px); 
+  overflow-y: auto; 
+  -webkit-overflow-scrolling: touch; 
+}
 .ecra.activo{ display:block; animation: surgir .25s ease; }
 @keyframes surgir{ from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform:none; } }
 
@@ -117,9 +129,6 @@ button, select, input{ font-family: inherit; }
 .pill-progresso{ background: var(--papel-alt); border-radius:999px; padding:3px 10px; font-weight:600; color: var(--tinta); }
 
 .barra-jogo{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom: 20px; padding-bottom:14px; border-bottom: 2px solid var(--linha); }
-.barra-jogo .titulo-modulo{ display:flex; align-items:center; gap:12px; }
-.titulo-modulo h2{ font-size:22px; margin:0; }
-.titulo-modulo .sub{ font-size:13px; color:var(--tinta-suave); margin:2px 0 0; }
 .barra-jogo-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .cx-layout{ display:flex; gap:28px; align-items:flex-start; width: 100%; }
@@ -369,7 +378,7 @@ const DICIONARIO = {
       { w: "EFEMERO", q: "Que tem pouca duração; passageiro como o ciclo de certos insetos" },
       { w: "BIOLUMINESCENCIA", q: "Produção e emissão de luz por parte de um organismo vivo" },
       { w: "ENDEMISMO", q: "Fenómeno em que uma espécie ocorre exclusivamente numa região" },
-      { w: "ANACRONISMO", q: "Colocação de elementos naturais ou históricos fora da sua era correta" },
+      { w: "ANACRONISMO", q: "Colocação de elements naturais ou históricos fora da sua era correta" },
       { w: "XEROFITA", q: "Planta adaptada a viver em ambientes com extrema escassez de água" },
       { w: "CONFLUENCIA", q: "Ponto de junção ou encontro de duas correntes de água ou rios" },
       { w: "FOTOSSINTESE", q: "Processo bioquímico pelo qual as plantas convertem luz em energia" },
@@ -1004,6 +1013,29 @@ const CruzadasUI = (function(){
     setTimeout(() => { document.querySelectorAll('.cx-celula').forEach(el => el.classList.remove('certo', 'errado')); realcarInterface(); }, 2000);
   }
 
+  function abrirModal(id){
+    const m = document.getElementById(id);
+    if(m) {
+      m.classList.add('aberto');
+      // Bloqueia eventos de toque fora do modal para blindar o scroll de fundo
+      m.addEventListener('touchmove', preventScroll, { passive: false });
+    }
+  }
+
+  function fecharModal(id){
+    const m = document.getElementById(id);
+    if(m) {
+      m.classList.remove('aberto');
+      m.removeEventListener('touchmove', preventScroll);
+    }
+  }
+
+  function preventScroll(e) {
+    if(e.target.classList.contains('modal-fundo')) {
+      e.preventDefault();
+    }
+  }
+
   function proporRevelacao(){
     if(!cur || finalizado || revelado) return;
     abrirModal('modalRevelar');
@@ -1036,12 +1068,12 @@ const CruzadasUI = (function(){
   function pararTemporizador(){ if(temporizador) clearInterval(temporizador); temporizador = null; }
   function renderTemporizador(){ const el = document.getElementById('cxTimer'); if(el) el.textContent = String(Math.floor(segundos/60)).padStart(2,'0')+':'+String(segundos%60).padStart(2,'0'); }
 
-  return { inicializar };
+  return { inicializar, abrirModal, fecharModal };
 })();
 
 function irPara(id){ document.querySelectorAll('.ecra').forEach(e => e.classList.remove('activo')); const el = document.getElementById(id); if(el) el.classList.add('activo'); }
-function abrirModal(id){ const m = document.getElementById(id); if(m) m.classList.add('aberto'); }
-function fecharModal(id){ const m = document.getElementById(id); if(m) m.classList.remove('aberto'); }
+function abrirModal(id){ CruzadasUI.abrirModal(id); }
+function fecharModal(id){ CruzadasUI.fecharModal(id); }
 function lancarToast(msg, tipo){
   const t = document.getElementById('toast'); t.textContent = msg; t.className = 'mostrar' + (tipo ? ' '+tipo : '');
   setTimeout(() => t.classList.remove('mostrar'), 3000);
@@ -1052,7 +1084,6 @@ document.addEventListener('DOMContentLoaded', () => {
   CruzadasUI.inicializar(); 
   document.getElementById('botaoMarca').onclick = () => irPara('ecraInicio'); 
 
-  // Ativação robusta do Service Worker para suporte PWA offline
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
