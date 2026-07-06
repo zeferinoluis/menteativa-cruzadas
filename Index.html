@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Palavras Cruzadas — Mente Ativa</title>
+
+<!-- ═══ PWA ═══ -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#C2702C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cruzadas Mente Ativa">
+<link class="apple-touch-icon" href="icon-192.png">
+
+<style>
+:root{
+  --papel:        #F6F0E4;
+  --papel-alt:    #EFE6D3;
+  --tinta:        #2B2420;
+  --tinta-suave:  #5C5246;
+  --ambar:        #C2702C;
+  --ambar-dk:     #9A551E;
+  --ambar-pale:   #F0DCBE;
+  --verde:        #4C6B4F;
+  --verde-pale:   #DCE6D7;
+  --terra:        #B5503F;
+  --terra-pale:   #F1DCD5;
+  --linha:        #DDD0B8;
+  --branco:       #FFFDF8;
+  --sombra:       rgba(43, 36, 32, 0.12);
+  --sombra-forte: rgba(43, 36, 32, 0.22);
+  --raio:         18px;
+  --raio-peq:     10px;
+}
+
+*{ box-sizing: border-box; }
+html, body{
+  margin:0; padding:0; min-height:100%;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+.f-display{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight:700; letter-spacing:-0.01em; }
+.f-corpo{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+button, select, input{ font-family: inherit; }
+
+.textura-fundo{
+  position: fixed; inset:0; z-index:-1; pointer-events:none;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(194,112,44,0.07), transparent 38%),
+    radial-gradient(circle at 82% 78%, rgba(76,107,79,0.06), transparent 42%);
+}
+
+.app-header{
+  position: sticky; top:0; z-index: 50;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding: 14px 22px;
+  background: var(--papel);
+  border-bottom: 2px solid var(--linha);
+}
+.marca{
+  display:flex; align-items:center; gap:12px;
+  cursor:pointer; user-select:none;
+}
+.marca-selo{
+  width:42px; height:42px; border-radius:50%;
+  background: linear-gradient(155deg, var(--ambar), var(--ambar-dk));
+  display:flex; align-items:center; justify-content:center;
+  font-size: 22px; color: var(--branco);
+  box-shadow: 0 3px 0 var(--ambar-dk), 0 4px 10px var(--sombra);
+  flex-shrink:0;
+}
+.marca-texto h1{ font-size: 20px; margin:0; line-height:1.1; }
+.marca-texto p{ margin:0; font-size:12px; color: var(--tinta-suave); }
+
+.btn{
+  font-size: 14px; font-weight:600; padding: 10px 16px; border-radius: 999px;
+  border: 2px solid var(--linha); background: var(--branco); color: var(--tinta);
+  cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+  transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
+  white-space:nowrap; -webkit-tap-highlight-color: transparent;
+}
+.btn:hover:not(:disabled){ background: var(--papel-alt); }
+.btn:active:not(:disabled){ transform: scale(.96); }
+.btn.btn-primario{ background: var(--ambar); border-color: var(--ambar-dk); color: var(--branco); }
+.btn.btn-primario:hover:not(:disabled){ background: var(--ambar-dk); }
+.btn.btn-perigo{ background: var(--terra-pale); border-color: var(--terra); color: var(--terra); }
+.btn.btn-perigo:hover:not(:disabled){ background: var(--terra); color: var(--branco); }
+.btn.btn-fantasma{ background: transparent; border-color: transparent; color: var(--tinta-suave); padding:8px 12px; }
+.btn.btn-fantasma:hover:not(:disabled){ background: var(--papel-alt); color: var(--tinta); }
+
+.ecra{ display:none; max-width:1200px; margin: 0 auto; padding: 24px 22px 60px; }
+.ecra.activo{ display:block; animation: surgir .25s ease; }
+@keyframes surgir{ from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform:none; } }
+
+.grid-temas{
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 24px;
+}
+.cartao-tema{
+  background: var(--branco); border: 2px solid var(--linha); border-radius: var(--raio);
+  padding: 22px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:10px;
+  box-shadow: 0 2px 0 var(--linha); transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.cartao-tema:hover{ transform: translateY(-3px); box-shadow: 0 8px 20px var(--sombra); border-color: var(--ambar); }
+.cartao-selo{
+  width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:24px; color:var(--branco); background: linear-gradient(155deg, var(--ambar), var(--ambar-dk));
+}
+.cartao-tema h3{ margin: 4px 0 0 0; font-size: 19px; }
+.cartao-tema p{ font-size:13px; color: var(--tinta-suave); margin:0; line-height:1.45; flex:1; }
+.cartao-rodape{ display:flex; align-items:center; justify-content:space-between; font-size:12px; color: var(--tinta-suave); margin-top:4px; }
+.pill-progresso{ background: var(--papel-alt); border-radius:999px; padding:3px 10px; font-weight:600; color: var(--tinta); }
+
+.barra-jogo{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom: 20px; padding-bottom:14px; border-bottom: 2px solid var(--linha); }
+.barra-jogo .titulo-modulo{ display:flex; align-items:center; gap:12px; }
+.titulo-modulo h2{ font-size:22px; margin:0; }
+.titulo-modulo .sub{ font-size:13px; color:var(--tinta-suave); margin:2px 0 0; }
+.barra-jogo-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.cx-layout{ display:flex; gap:28px; align-items:flex-start; width: 100%; }
+.cx-tabuleiro-wrap{ flex: 1 1 auto; width: 100%; overflow-x: auto; background: var(--tinta); padding: 8px; border-radius: 12px; box-shadow: 0 4px 20px var(--sombra-forte); }
+.cx-tabuleiro{ position:relative; display:block; background: var(--tinta); margin: 0 auto; }
+
+.cx-grelha{ display:grid; gap:1px; background: var(--tinta); touch-action: manipulation; margin: 0 auto; width: max-content; max-width: 100%; }
+
+.cx-celula{ width: 3.2vw; height: 3.2vw; min-width: 26px; min-height: 26px; max-width: 40px; max-height: 40px; background: var(--branco); position:relative; }
+.cx-celula.bloco{ background: var(--tinta); }
+.cx-celula.palavra-activa{ background: var(--ambar-pale); }
+.cx-celula.letra-activa{ background: #E3C58E; }
+.cx-celula.certo{ background: var(--verde-pale) !important; }
+.cx-celula.errado{ background: var(--terra-pale) !important; }
+.cx-celula input{
+  position:absolute; inset:0; width:100%; height:100%; border:none; background:transparent;
+  text-align:center; font-size:16px; font-weight:700; color:var(--tinta); text-transform:uppercase;
+  outline:none; padding:0; caret-color:transparent;
+}
+.cx-celula .num{ position:absolute; top:2px; left:3px; font-size:8px; font-weight:700; color: var(--tinta-suave); line-height:1; pointer-events:none; }
+.cx-pausa-cobertura{ position:absolute; inset:0; background: rgba(246,240,228,0.98); display:none; flex-direction:column; align-items:center; justify-content:center; gap:12px; z-index:20; }
+.cx-pausa-cobertura.aberta{ display:flex; }
+
+.cx-pistas{ flex:1 1 100%; width: 100%; }
+.cx-grupo-pistas{ margin-bottom:22px; background: var(--branco); border: 2px solid var(--linha); border-radius: 12px; padding: 14px; max-height: 320px; overflow-y: auto; }
+.cx-grupo-titulo{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color: var(--ambar-dk); margin-bottom:10px; padding-bottom:4px; border-bottom: 2px solid var(--papel-alt); }
+.cx-pista{ padding:6px 8px; font-size:14px; border-radius:6px; cursor:pointer; color: var(--tinta); line-height:1.4; display:flex; gap:8px; align-items:flex-start; }
+.cx-pista:hover{ background: var(--papel); }
+.cx-pista.activa{ background: var(--ambar-pale); font-weight: 500; }
+.cx-pista.feita{ color: var(--tinta-suave); text-decoration: line-through; opacity:.5; }
+.cx-pista .num{ font-weight:700; color: var(--ambar-dk); min-width:18px; }
+
+.cx-barra-progresso-wrap{ height:6px; background: var(--linha); border-radius:999px; overflow:hidden; margin-bottom:16px; }
+.cx-barra-progresso-fill{ height:100%; background: var(--verde); width:0; transition: width .3s ease; }
+
+.modal-fundo{ position: fixed; inset:0; z-index: 200; background: rgba(43,36,32,0.55); display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-fundo.aberto{ display:flex; }
+.modal{ background: var(--branco); border-radius: var(--raio); padding: 26px; max-width: 440px; width:100%; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+.modal h3 { margin-top: 0; }
+.modal-acoes{ display:flex; gap:10px; justify-content:center; margin-top:18px; }
+.modal-acoes-col{ flex-direction:column; }
+.modal-acoes-col .btn { width: 100%; justify-content: center; }
+
+@media (max-width: 1024px) {
+  .cx-layout { flex-direction: column; align-items: stretch; gap: 20px; }
+  .cx-tabuleiro-wrap { width: 100%; display: block; overflow-x: auto; }
+  .cx-pistas { width: 100%; }
+  .cx-grupo-pistas { max-height: none; height: auto; overflow-y: visible; }
+  .barra-jogo { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .barra-jogo-acoes { width: 100%; justify-content: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div class="textura-fundo"></div>
+
+<header class="app-header">
+  <div class="marca" id="botaoMarca">
+    <div class="marca-selo">🧠</div>
+    <div class="marca-texto">
+      <h1 class="f-display">Mente Ativa</h1>
+      <p>Desafios de Alto Nível Cognitivo</p>
+    </div>
+  </div>
+  <div class="header-acoes">
+    <button class="btn btn-fantasma" id="btnGuardarTopo">💾 Guardar</button>
+    <button class="btn btn-fantasma" id="btnLimparTopo">🗑️ Limpar dados</button>
+  </div>
+</header>
+
+<main class="ecra activo" id="ecraInicio">
+  <div class="bemvindo">
+    <h2 class="f-display">Puzzles de Palavras Cruzadas Eruditas</h2>
+    <p>Selecione um tema. O motor reconstrói a grelha dinamicamente com base num dicionário avançado sem interrupções de fluxo.</p>
+  </div>
+  <div class="grid-temas" id="gridTemas"></div>
+</main>
+
+<section class="ecra" id="ecraCruzadas">
+  <div class="barra-jogo">
+    <div class="titulo-modulo">
+      <div id="seloTemaActivo" style="width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; background:var(--ambar); color:white;">✏️</div>
+      <div>
+        <h2 class="f-display" id="cruzadasTitulo">Palavras Cruzadas</h2>
+        <p class="sub" id="cruzadasSubtitulo">A carregar…</p>
+      </div>
+    </div>
+    <div class="barra-jogo-acoes">
+      <select class="btn" id="selectNivelCruzadas">
+        <option value="facil">Fácil</option>
+        <option value="medio">Médio</option>
+        <option value="dificil" selected>Difícil / Erudito</option>
+      </select>
+      <button class="btn" id="btnNovoCruzadas">🔀 Novo</button>
+      <button class="btn" id="btnVerificarCruzadas">✔️ Verificar</button>
+      <button class="btn btn-fantasma" id="btnRevelarCruzadas">👁️ Revelar</button>
+      <button class="btn btn-fantasma" id="btnVoltarCruzadas">← Voltar</button>
+    </div>
+  </div>
+  <div id="areaCruzadas"></div>
+</section>
+
+<div id="toast" role="status"></div>
+
+<!-- Modais -->
+<div class="modal-fundo" id="modalLimpar">
+  <div class="modal">
+    <h3 class="f-display">Apagar o progresso local?</h3>
+    <p>Isto irá limpar permanentemente as suas estatísticas guardadas.</p>
+    <div class="modal-acoes">
+      <button class="btn" id="btnCancelarLimpar">Cancelar</button>
+      <button class="btn btn-perigo" id="btnConfirmarLimpar">Apagar tudo</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modalConfirmar">
+  <div class="modal">
+    <h3 class="f-display">Mudar de Puzzle?</h3>
+    <p id="textoConfirmar">O progresso da grelha atual será substituído.</p>
+    <div class="modal-acoes">
+      <button class="btn" id="btnConfirmarNao">Cancelar</button>
+      <button class="btn btn-primario" id="btnConfirmarSim">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modalRevelar">
+  <div class="modal">
+    <h3 class="f-display">Mostrar soluções?</h3>
+    <p>A grelha será totalmente revelada e o progresso atual será encerrado.</p>
+    <div class="modal-acoes">
+      <button class="btn" id="btnCancelarRevelar">Cancelar</button>
+      <button class="btn btn-perigo" id="btnConfirmarRevelar">Revelar tudo</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modalConclusao">
+  <div class="modal">
+    <div style="font-size:40px; margin-bottom:10px;">🏆</div>
+    <h3 class="f-display">Grelha Concluída!</h3>
+    <p id="textoConclusao">Parabéns, resolveu todas as intersecções eruditas.</p>
+    <div class="modal-acoes modal-acoes-col">
+      <button class="btn btn-primario" id="btnConclusaoNovo">🔁 Gerar novo puzzle neste tema</button>
+      <button class="btn" id="btnConclusaoMenu">🎲 Voltar à seleção de temas</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const CX_TEMAS = [
+  {id:'geral', nome:'Cultura Geral', icone:'🌍', cor:'linear-gradient(155deg, #4A6FA5, #35507C)'},
+  {id:'natureza', nome:'Natureza e Ciência', icone:'🍃', cor:'linear-gradient(155deg, #4C6B4F, #3A523C)'},
+  {id:'portugal', nome:'Portugal', icone:'🇵🇹', cor:'linear-gradient(155deg, #B5503F, #8F3A2A)'},
+  {id:'saude', nome:'Saúde e Corpo', icone:'🩺', cor:'linear-gradient(155deg, #C2702C, #9A551E)'},
+  {id:'artes', nome:'Artes e Letras', icone:'🎭', cor:'linear-gradient(155deg, #7A5C8F, #5C4368)'},
+  {id:'viagens', nome:'Viagens e Lugares', icone:'✈️', cor:'linear-gradient(155deg, #9A8A5C, #756842)'}
+];
+
+const DICIONARIO = {
+  "saude": {
+    "facil": [
+      { w: "DENTE", q: "Estrutura dura da boca usada para mastigar" },
+      { w: "OSSO", q: "Parte rígida do esqueleto" },
+      { w: "PELE", q: "O maior órgão do corpo humano" },
+      { w: "VEIA", q: "Vaso que transporta o sangue para o coração" },
+      { w: "SANGUE", q: "Líquido vital de cor vermelha" }
+    ],
+    "medio": [
+      { w: "BUCINADOR", q: "Músculo da bochecha auxiliar na mastigação" },
+      { w: "ESMALTE", q: "Camada externa protetora do dente" },
+      { w: "GENGIVA", q: "Tecido mole que envolve a base dos dentes" },
+      { w: "BIOFILME", q: "Placa bacteriana acumulada nas superfícies" },
+      { w: "SINTOMA", q: "Sinal indicador de uma patologia" },
+      { w: "ARTERIA", q: "Vaso que leva o sangue oxigenado a partir do coracao" },
+      { w: "DIABETES", q: "Disturbio metabolico caracterizado por glicemia elevada" },
+      { w: "INFLAMACAO", q: "Reacao imunologica local a uma agressao ou infeccao" },
+      { w: "GLUCOSE", q: "Principal acucar simples que serve de energia cellular" },
+      { w: "NEURONIO", q: "Celula altamente especializada do sistema nervoso" },
+      { w: "COLESTEROL", q: "Composto lipidico essencial membranas mas perigoso em excesso" },
+      { w: "PULMAO", q: "Orgao duplo toracico responsavel pelas trocas gasosas" },
+      { w: "ALERGIA", q: "Resposta imunitaria exagerada a uma substancia inofensiva" },
+      { w: "FRACTURA", q: "Quebra ou descontinuidade estrutural de um osso" },
+      { w: "VACINA", q: "Preparacao imunologica para prevenir doencas infeciosas" }, // <-- Corrigido aqui
+      { w: "BIOMATERIAL", q: "Material sintético ou natural usado em restaurações" },
+      { w: "PROFILAXIA", q: "Procedimento de limpeza dentária profissional" },
+      { w: "CANAL", q: "Espaço interno da raiz do dente" },
+      { w: "MAXILAR", q: "Osso que sustenta a arcada dentária superior" },
+      { w: "DENTINA", q: "Tecido mineralizado abaixo do esmalte" },
+      { w: "MANDIBULA", q: "Osso móvel da arcada dentária inferior" },
+      { w: "IMPLANTE", q: "Parafuso de titânio que substitui a raiz dentária" },
+      { w: "ORTODONTIA", q: "Especialidade que corrige o alinhamento dos dentes" },
+      { w: "PERIODONTO", q: "Estruturas de suporte e proteção dos dentes" },
+      { w: "FLUORETO", q: "Mineral usado para prevenir a cárie dentária" }
+    ],
+    "dificil": [
+      { w: "MITOCONDRIA", q: "Organelo celular responsável pela respiração e produção de ATP" },
+      { w: "SARCOPLASMA", q: "O citoplasma das células musculares estriadas" },
+      { w: "HOMEOCINESE", q: "Regulação de fluidos corporais para manter o equilíbrio biológico" },
+      { w: "PATOGENESE", q: "Origem e desenvolvimento de uma doença ou processo mórbido" },
+      { w: "ANAFILAXIA", q: "Reação alérgica sistémica grave e potencialmente fatal" },
+      { w: "IDIOPATICO", q: "Diz-se de uma afeição de causa desconhecida ou espontânea" },
+      { w: "VALETUDINARIO", q: "Indivíduo de saúde débil, constantemente doente ou frágil" },
+      { w: "PROSTADO", q: "Sem forças físicas ou morais; profundamente exausto" },
+      { w: "ESTERILIZAR", q: "Eliminar totalmente os microrganismos de um instrumento" },
+      { w: "AUTOCLAVE", q: "Aparelho utilizado para esterilização a vapor sob pressão" },
+      { w: "RESIDUOS", q: "Lixo hospitalar ou clínico que exige triagem regulamentada estrita" }
+    ]
+  },
+  "natureza": {
+    "facil": [
+      { w: "FLOR", q: "Parte reprodutora colorida da planta" },
+      { w: "AGUA", q: "Recurso líquido incolor vital à vida" },
+      { w: "VENTO", q: "Movimento natural do ar atmosférico" }
+    ],
+    "medio": [
+      { w: "AGUIA", q: "Ave de rapina dotada de visão extremamente apurada" },
+      { w: "CLIMA", q: "Padrão de condições meteorológicas de um local a longo prazo" },
+      { w: "CELULA", q: "A unidade básica estrutural dos seres vivos" },
+      { w: "HABITAT", q: "Ambiente natural onde uma especie vive e se desenvolve" },
+      { w: "FOSSIL", q: "Resto ou vestigio preservado de um organismo do passado" },
+      { w: "ATMOSFERA", q: "Camada gasosa que envolve e protege um corpo celeste" },
+      { w: "GALAXIA", q: "Grande sistema de estrelas, poeira e materia escura" },
+      { w: "TSUNAMI", q: "Onda gigante gerada por atividade sismica submarina" },
+      { w: "MINERAL", q: "Substancia solida e natural com estrutura cristalina" },
+      { w: "PREDADOR", q: "Animal que caca e mata outros para se alimentar" },
+      { w: "SIMBIOSE", q: "Interacao de longo prazo entre duas especies diferentes" },
+      { w: "FURACAO", q: "Tempestade ciclonica tropical de enorme intensidade" },
+      { w: "EROSAO", q: "Desgaste da superficie terrestre pelas forcas da natureza" },
+      { w: "POLUICAO", q: "Contaminação do ambiente por agentes nocivos" },
+      { w: "GLACIAR", q: "Massa de gelo que se desloca lentamente" },
+      { w: "TORNADO", q: "Coluna de ar violenta em rotação" },
+      { w: "PLANETA", q: "Corpo celeste que orbita uma estrela" },
+      { w: "OXIGENIO", q: "Gás essencial para a respiração dos seres vivos" },
+      { w: "CARBONO", q: "Elemento químico base de toda a vida conhecida" },
+      { w: "DESERTO", q: "Região com escassa precipitação pluviométrica" },
+      { w: "FLORESTA", q: "Grande extensão coberta por árvores e vegetação" },
+      { w: "MAGNETICO", q: "Relativo ao campo de forças atrativas" },
+      { w: "GEOLOGIA", q: "Ciência que estuda a composição da Terra" }
+    ],
+    "dificil": [
+      { w: "PLUVIOMETRO", q: "Aparelho meteorológico que mede a quantidade de precipitação caída" },
+      { w: "EFEMERO", q: "Que tem pouca duração; passageiro como o ciclo de certos insetos" },
+      { w: "BIOLUMINESCENCIA", q: "Produção e emissão de luz por parte de um organismo vivo" },
+      { w: "ENDEMISMO", q: "Fenómeno em que uma espécie ocorre exclusivamente numa região" },
+      { w: "ANACRONISMO", q: "Colocação de elementos naturais ou históricos fora da sua era correta" },
+      { w: "XEROFITA", q: "Planta adaptada a viver em ambientes com extrema escassez de água" },
+      { w: "CONFLUENCIA", q: "Ponto de junção ou encontro de duas correntes de água ou rios" },
+      { w: "FOTOSSINTESE", q: "Processo bioquímico pelo qual as plantas convertem luz em energia" },
+      { w: "ECOSSISTEMA", q: "Complexo dinâmico de comunidades vegetais, animais e o seu ambiente" }
+    ]
+  },
+  "geral": {
+    "facil": [
+      { w: "JOGO", q: "Atividade lúdica sujeita a regras estruturadas" },
+      { w: "CASA", q: "Edifício destinado a habitação humana" },
+      { w: "LUZ", q: "Radiação eletromagnética visível pelo olho" }
+    ],
+    "medio": [
+      { w: "LIVRO", q: "Conjunto encadernado de páginas impressas" },
+      { w: "REGRA", q: "Preceito ou norma que dita como se deve agir" },
+      { w: "LOGICA", q: "Ramo da filosofia que estuda a validade do raciocínio" },
+      { w: "CIENCIA", q: "Conhecimento sistematico baseado em observacao e testes" },
+      { w: "CULTURA", q: "Conjunto de habitos, saberes e artes de um povo" },
+      { w: "HISTORIA", q: "Estudo e registo das acoes humanas ao longo do tempo" },
+      { w: "POLITICA", q: "Arte ou ciencia da governacao e organizacao social" },
+      { w: "ECONOMIA", q: "Ciencia que estuda a producao e distribuicao de bens" },
+      { w: "JUSTICA", q: "Principio moral que preconiza a equidade e o direito" },
+      { w: "IMPOSTO", q: "Contribuicao financeira obrigatoria devida ao Estado" },
+      { w: "REPUBLICA", q: "Forma de governo onde o chefe de Estado e eleito" },
+      { w: "CIDADÃO", q: "Individuo no pleno gozo dos seus direitos politicos" },
+      { w: "CONTRATO", q: "Acordo juridico formal entre duas ou mais partes" },
+      { w: "ARGUMENTO", q: "Raciocínio usado para provar ou justificar algo" },
+      { w: "CONTEXTO", q: "Conjunto de circunstâncias que envolvem um facto" },
+      { w: "DIPLOMACIA", q: "Gestão de relações entre Estados ou organizações" },
+      { w: "FILOSOFIA", q: "Investigação sobre o conhecimento e existência" },
+      { w: "TRADICAO", q: "Costume transmitido de geração em geração" },
+      { w: "IDENTIDADE", q: "Caraterísticas que definem um indivíduo ou grupo" },
+      { w: "INOVACAO", q: "Introdução de novidades ou novos métodos" },
+      { w: "SOCIEDADE", q: "Grupo de pessoas que vivem em comunidade" },
+      { w: "AUTONOMIA", q: "Capacidade de governar-se a si mesmo" },
+      { w: "LIDERANCA", q: "Capacidade de influenciar e orientar um grupo" }
+    ],
+    "dificil": [
+      { w: "PRAGMATICO", q: "Focado nos objetivos práticos, utilidade e resultados reais" },
+      { w: "RESILIENCIA", q: "Capacidade de superar a adversidade e adaptar-se à mudança" },
+      { w: "NEPOTISMO", q: "Favorecimento ilegal de familiares ou amigos em cargos de poder" },
+      { w: "IDOSSINCRASIA", q: "Disposição temperamental ou característica peculiar de um indivíduo" },
+      { w: "PEREMPTORIO", q: "Decisivo, categórico e que não permite réplica ou contestação" },
+      { w: "HEGEMONIA", q: "Supremacia ou soberania política e económica de um Estado sobre outros" },
+      { w: "AMBIVALENTE", q: "Que apresenta dois valores distintos ou sentimentos opostos em simultâneo" },
+      { w: "TERGIVERSAR", q: "Utilizar subterfúgios ou evasivas; hesitar, não ir direto ao assunto" },
+      { w: "PARADOXO", q: "Contradição aparente que desafia as leis da lógica tradicional" },
+      { w: "LOGRIFICO", q: "Que tem o caráter de um enigma difícil; obscuro ou indecifrável" },
+      { w: "JUSTAPOSTO", q: "Colocado imediatamente ao lado de outra coisa, sem interposição" },
+      { w: "FASTIDIOSO", q: "Que causa tédio ou contrariedade; profundamente aborrecido" },
+      { w: "SINECURA", q: "Cargo altamente rendoso que exige muito pouco ou nenhum trabalho" }
+    ]
+  },
+  "artes": {
+    "facil": [
+      { w: "POEMA", q: "Construção literária geralmente estruturada em versos" },
+      { w: "ARTE", q: "Expressão criativa ou estética humana" },
+      { w: "TELA", q: "Superfície de tecido onde o pintor aplica as tintas" }
+    ],
+    "medio": [
+      { w: "AUTOR", q: "Criador original de uma obra literária ou artística" },
+      { w: "MUSEU", q: "Instituição que preserva, estuda e expõe coleções de valor" },
+      { w: "PINTOR", q: "Artista plástico que se exprime através da cor e formas numa tela" },
+      { w: "COMEDIA", q: "Peca teatral ou filme com intencao humoristica" },
+      { w: "TRAGEDIA", q: "Drama teatral de cariz grave que evoca a fatalidade" },
+      { w: "ESCULTOR", q: "Artista que modela formas tridimensionais solidas" },
+      { w: "MAESTRO", q: "Diretor ou regente de uma orquestra musical" },
+      { w: "SINFONIA", q: "Composicao musical complexa para grande orquestra" },
+      { w: "GRAVURA", q: "Impressao de um desenho a partir de uma matriz incisa" },
+      { w: "ROMANCE", q: "Narrativa literaria longa em prosa com trama complexa" },
+      { w: "POESIA", q: "Arte de compop textos expressivos com ritmo e rima" },
+      { w: "CRITICA", q: "Analise ponderada e opiniao fundamentada sobre uma obra" },
+      { w: "GALERIA", q: "Espaço comercial ou publico de exposicao de arte" }, // <-- Corrigido aqui
+      { w: "MELODIA", q: "Sequência organizada de sons musicais" },
+      { w: "HARMONIA", q: "Combinação agradável de notas musicais" },
+      { w: "NARRATIVA", q: "Exposição de factos ou eventos" },
+      { w: "ESCULTURA", q: "Arte de modelar ou talhar formas tridimensionais" },
+      { w: "PIGMENTO", q: "Substância que confere cor a uma tinta" },
+      { w: "RITMO", q: "Cadência ou movimento regular numa composição" },
+      { w: "CENARIO", q: "Conjunto de elementos que representam o ambiente" },
+      { w: "PARTITURA", q: "Documento onde se escreve a música" },
+      { w: "MUSEOLOGIA", q: "Estudo e gestão de museus e coleções" },
+      { w: "TEATRO", q: "Arte de representar histórias no palco" }
+    ],
+    "dificil": [
+      { w: "MELANCOLIA", q: "Tristeza vaga, profunda e permanente; estado de depressão poética" },
+      { w: "QUIMERICO", q: "Que é produto da imaginação pura; utópico, fantástico, ilusório" },
+      { w: "VICISSITUDE", q: "Sucessão de mudanças ou alternâncias; instabilidade da sorte" },
+      { w: "ESTOICO", q: "Que mostra firmeza e impassibilidade perante a dor ou o sofrimento" },
+      { w: "DENEGRIR", q: "Manchar a reputação, valor ou beleza de uma obra ou indivíduo" },
+      { w: "ALTANEIRO", q: "Que voa muito alto; por extensão, soberbo, orgulhoso ou altivo" },
+      { w: "ONIRICO", q: "Relativo aos sonhos ou que tem o caráter vago e fantástico destes" },
+      { w: "DRAMATURGO", q: "Escritor especializado na composição de peças de teatro" },
+      { w: "RENASCIMENTO", q: "Período cultural europeu de redescoberta artística da antiguidade clássica" }
+    ]
+  },
+  "viagens": {
+    "facil": [
+      { w: "MAPA", q: "Representação cartográfica de um terreno ou rotas" },
+      { w: "VOO", q: "Ato ou efeito de viajar por meio de aeronave" }
+    ],
+    "medio": [
+      { w: "HOTEL", q: "Estabelecimento comercial de alojamento temporário" },
+      { w: "ROTA", q: "Caminho ou itinerário planeado num mapa de viagem" },
+      { w: "TURISMO", q: "Atividade de viajar por lazer ou divertimento" },
+      { w: "BAGAGEM", q: "Conjunto de malas e pertences levados na viagem" },
+      { w: "DESTINO", q: "Local fixado para o termo de uma jornada" },
+      { w: "CRUZEIRO", q: "Viagem turistica realizada a bordo de um grande navio" },
+      { w: "POUSADA", q: "Estabelecimento de alojamento tipico ou regional" },
+      { w: "ESTACAO", q: "Local de paragem e embarque de comboios ou autocarros" },
+      { w: "CONVENCÃO", q: "Reuniao ou assembleia internacional de cariz profissional" },
+      { w: "EMBARQUE", q: "Ato de entrar numa aeronave ou navio para viajar" },
+      { w: "MONUMENTO", q: "Obra ou edificio de grande valor historico ou arquitetonico" },
+      { w: "MEMORIAS", q: "Recordacoes ou registos de experiencias vividas num local" },
+      { w: "ITINERARIO", q: "Plano detalhado de um percurso de viagem" },
+      { w: "FRONTEIRA", q: "Linha que separa dois territórios ou países" },
+      { w: "TURISMO", q: "Deslocação de pessoas por lazer ou cultura" },
+      { w: "AEROPORTO", q: "Infraestrutura para operações de aeronaves" },
+      { w: "BAGAGEM", q: "Conjunto de volumes transportados pelo viajante" },
+      { w: "PASSAPORTE", q: "Documento para identificação internacional" },
+      { w: "AVENTURA", q: "Experiência que envolve risco ou novidade" },
+      { w: "ALOJAMENTO", q: "Local temporário onde se reside na viagem" },
+      { w: "BUSSOLA", q: "Instrumento usado para orientação geográfica" },
+      { w: "EXCURSAO", q: "Passeio organizado de curta duração" }
+    ],
+    "dificil": [
+      { w: "PEREGRINACAO", q: "Jornada longa com propósitos espirituais por terras distantes" },
+      { w: "ITINERANTE", q: "Que se desloca continuamente de um lugar para o outro sem paragem fixa" },
+      { w: "MEANDROS", q: "Sinuosidades ou curvas acentuadas de um rio ou caminho tortuoso" },
+      { w: "EXOTICO", q: "Que provém de país estrangeiro; que causa fascínio pelo ineditismo" },
+      { w: "TOPOGRAFIA", q: "Descrição detalhada e geométrica do relevo de uma região" },
+      { w: "EXPEDICAO", q: "Viagem organizada com fins científicos, militares ou de exploração" },
+      { w: "PASSAPORTE", q: "Documento oficial de identidade exigido para trânsito internacional" }
+    ]
+  },
+  "portugal": {
+    "facil": [
+      { w: "FADO", q: "Estilo musical melancólico tradicional português" },
+      { w: "TEJO", q: "O maior rio em extensão na Península Ibérica" }
+    ],
+    "medio": [
+      { w: "VIANA", q: "Cidade do Alto Minho conhecida pelo folclore e pelo navio Gil Eannes" },
+      { w: "COURA", q: "Rio que banha a vila conhecida pelo seu festival de música alternativo" },
+      { w: "AZULEJO", q: "Placa cerâmica decorativa tradicional na arquitetura lusa" },
+      { w: "ALGARVE", q: "Regiao litoral a sul muito procurada pelas praias" },
+      { w: "COIMBRA", q: "Cidade dos estudantes com a universidade mais antiga do pais" },
+      { w: "SARDINHA", q: "Peixe assado obrigatorio nas festas dos Santos Populares" },
+      { w: "MINHO", q: "Regiao verdejante a norte famosa pelo vinho verde" },
+      { w: "DOURO", q: "Rio ladeado por encostas vinhas onde nasce o Porto" },
+      { w: "ROMASTICA", q: "Estilo arquitetonico luso presente na Se Velha de Coimbra" },
+      { w: "CORTIÇA", q: "Produto natural extraido do sobreiro do qual Portugal e lider" },
+      { w: "ALENTEJO", q: "Vasta planicie a sul do Tejo famosa pelo calor e azeite" },
+      { w: "GIRASSOL", q: "Flor cultivada nos campos alentejanos que segue o sol" },
+      { w: "PASTEL", q: "O famoso pastel de Belem ou de nata, doce tipico nacional" }, // <-- Corrigido aqui
+      { w: "CARAVELA", q: "Navio da Era dos Descobrimentos" },
+      { w: "HISTORIA", q: "Estudo do passado, essencial para entender Portugal" },
+      { w: "FOLCLORE", q: "Tradições populares, danças e cantares" },
+      { w: "GASTRONOMIA", q: "Arte de cozinhar, famosa pelo bacalhau" },
+      { w: "PATRIMONIO", q: "Conjunto de bens culturais e monumentos" },
+      { w: "LISBOA", q: "Capital situada na foz do rio Tejo" },
+      { w: "ATLANTICO", q: "Oceano que banha a costa ocidental portuguesa" },
+      { w: "MARINHEIRO", q: "Profissional que trabalha em navios" },
+      { w: "VINHEDO", q: "Plantação de videiras típica de várias regiões" },
+      { w: "COSTUME", q: "Prática ou hábito comum de uma região" }
+    ],
+    "dificil": [
+      { w: "ALVADO", q: "Designação antiga para certas cavidades geológicas ou concavidades" },
+      { w: "DILIGENCIA", q: "Antiga carruagem de transporte público interurbano de malas postais" },
+      { w: "SOBRANCEIRO", q: "Que está situado num plano superior; elevado, que domina a paisagem" },
+      { w: "LUSITANIDADE", q: "Conjunto dos traços culturais e identitários do povo português" },
+      { w: "MANUELINO", q: "Estilo arquitetónico e ornamental marcadamente português d'el-rei D. Manuel I" },
+      { w: "FRANCESINHA", q: "Iguaria gastronómica portuense composta por carnes, queijo e molho picante" },
+      { w: "GUIMARAES", q: "Cidade berço de Portugal, associada à fundação da nacionalidade por D. Afonso Henriques" }
+    ]
+  }
+};
+
+const ARMAZEM = {
+  CHAVE: 'cruzadas_pwa_save',
+  ler(){ try{ const s=localStorage.getItem(this.CHAVE); return s?JSON.parse(s):null; }catch(e){return null;} },
+  guardar(v){ try{ localStorage.setItem(this.CHAVE, JSON.stringify(v)); }catch(e){} },
+  limpar(){ try{ localStorage.removeItem(this.CHAVE); }catch(e){} }
+};
+
+const MotorGrelhas = {
+  gerar(listaPalavras, maxPalavras = 6) {
+    if(!listaPalavras || listaPalavras.length === 0) return null;
+    
+    let candidatas = [...listaPalavras].sort(() => 0.5 - Math.random()).slice(0, maxPalavras);
+    candidatas.sort((a, b) => b.w.length - a.w.length);
+    
+    let grelhaTemp = Array(40).fill(null).map(() => Array(40).fill('.'));
+    let palavrasColocadas = [];
+    
+    const p1 = candidatas[0];
+    const rInicial = 20;
+    const cInicial = 20 - Math.floor(p1.w.length / 2);
+    
+    for(let i = 0; i < p1.w.length; i++) grelhaTemp[rInicial][cInicial + i] = p1.w[i];
+    palavrasColocadas.push({ w: p1.w, q: p1.q, r: rInicial, c: cInicial, d: 'H' });
+    
+    for(let i = 1; i < candidatas.length; i++) {
+      let pAlvo = candidatas[i];
+      let colocada = false;
+      
+      for(let pc of palavrasColocadas) {
+        if(colocada) break;
+        for(let j = 0; j < pAlvo.w.length; j++) {
+          if(colocada) break;
+          let letra = pAlvo.w[j];
+          let k = pc.w.indexOf(letra);
+          
+          if(k !== -1) {
+            let rNova, cNova, dNova;
+            if(pc.d === 'H') { rNova = pc.r - j; cNova = pc.c + k; dNova = 'V'; } 
+            else { rNova = pc.r + k; cNova = pc.c - j; dNova = 'H'; }
+            
+            if(this.podeColocar(grelhaTemp, pAlvo.w, rNova, cNova, dNova)) {
+              for(let m = 0; m < pAlvo.w.length; m++) {
+                if(dNova === 'H') grelhaTemp[rNova][cNova + m] = pAlvo.w[m];
+                else grelhaTemp[rNova + m][cNova] = pAlvo.w[m];
+              }
+              palavrasColocadas.push({ w: pAlvo.w, q: pAlvo.q, r: rNova, c: cNova, d: dNova });
+              colocada = true;
+            }
+          }
+        }
+      }
+    }
+    
+    if(palavrasColocadas.length < 2) return null;
+    return this.recortarGrelha(grelhaTemp, palavrasColocadas);
+  },
+  
+  podeColocar(grelha, palavra, r, c, d) {
+    if(r < 0 || c < 0 || (d === 'H' && c + palavra.length >= 40) || (d === 'V' && r + palavra.length >= 40)) return false;
+    
+    for(let i = 0; i < palavra.length; i++) {
+      let rAtual = d === 'H' ? r : r + i;
+      let cAtual = d === 'H' ? c + i : c;
+      let rEsq = d === 'H' ? rAtual - 1 : rAtual;
+      let cEsq = d === 'H' ? cAtual : cAtual - 1;
+      let rDir = d === 'H' ? rAtual + 1 : rAtual;
+      let cDir = d === 'H' ? cAtual : cAtual + 1;
+      
+      if(grelha[rAtual][cAtual] !== '.' && grelha[rAtual][cAtual] !== palavra[i]) return false;
+      
+      if(grelha[rAtual][cAtual] === '.') {
+        if(rEsq >= 0 && cEsq >= 0 && grelha[rEsq][cEsq] !== '.' && d === 'H') return false;
+        if(rDir < 40 && cDir < 40 && grelha[rDir][cDir] !== '.' && d === 'H') return false;
+        if(rEsq >= 0 && cEsq >= 0 && grelha[rEsq][cEsq] !== '.' && d === 'V') return false;
+        if(rDir < 40 && cDir < 40 && grelha[rDir][cDir] !== '.' && d === 'V') return false;
+      }
+      
+      if(i === 0) {
+        let rAtras = d === 'H' ? rAtual : rAtual - 1;
+        let cAtras = d === 'H' ? cAtual - 1 : cAtual;
+        if(rAtras >= 0 && cAtras >= 0 && grelha[rAtras][cAtras] !== '.') return false;
+      }
+      if(i === palavra.length - 1) {
+        let rFrente = d === 'H' ? rAtual : rAtual + 1;
+        let cFrente = d === 'H' ? cAtual + 1 : cAtual;
+        if(rFrente < 40 && cFrente < 40 && grelha[rFrente][cFrente] !== '.') return false;
+      }
+    }
+    return true;
+  },
+  
+  recortarGrelha(grelhaTemp, palavras) {
+    let minR = 40, maxR = 0, minC = 40, maxC = 0;
+    for(let r = 0; r < 40; r++) {
+      for(let c = 0; c < 40; c++) {
+        if(grelhaTemp[r][c] !== '.') {
+          minR = Math.min(minR, r); maxR = Math.max(maxR, r);
+          minC = Math.min(minC, c); maxC = Math.max(maxC, c);
+        }
+      }
+    }
+    
+    const palavrasAjustadas = palavras.map(p => ({
+      ...p, r: p.r - minR, c: p.c - minC
+    }));
+    
+    const linhas = [];
+    for(let r = minR; r <= maxR; r++) {
+      linhas.push(grelhaTemp[r].slice(minC, maxC + 1).join(''));
+    }
+    
+    return {
+      nrows: maxR - minR + 1,
+      size: maxC - minC + 1,
+      rows: linhas,
+      words: palavrasAjustadas
+    };
+  }
+};
+
+const CruzadasUI = (function(){
+  let cur = null, grelha = null, seleccao = null, direccao = 'H';
+  let pausado = false, segundos = 0, temporizador = null, revelado = false, finalizado = false;
+
+  function inicializar(){
+    const container = document.getElementById('gridTemas');
+    container.innerHTML = CX_TEMAS.map((t, idx) => `
+      <button class="cartao-tema" data-idx="${idx}">
+        <div class="cartao-selo" style="background:${t.cor}">${t.icone}</div>
+        <h3 class="f-display">${t.nome}</h3>
+        <p>Grelhas com cálculo de intersecções sem falhas estruturais.</p>
+        <div class="cartao-rodape">
+          <span class="pill-progresso">Erudito Pronto</span>
+        </div>
+      </button>
+    `).join('');
+
+    container.querySelectorAll('.cartao-tema').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.idx);
+        abrirDesafio(idx, document.getElementById('selectNivelCruzadas').value);
+      });
+    });
+
+    document.getElementById('selectNivelCruzadas').addEventListener('change', e => {
+      if(cur && !finalizado) confirmarMudanca(() => abrirDesafio(cur.temaIdx, e.target.value));
+      else if(cur) abrirDesafio(cur.temaIdx, e.target.value);
+    });
+
+    document.getElementById('btnNovoCruzadas').addEventListener('click', () => {
+      if(cur && !finalizado) confirmarMudanca(() => abrirDesafio(cur.temaIdx, cur.nivel));
+      else if(cur) abrirDesafio(cur.temaIdx, cur.nivel);
+    });
+
+    document.getElementById('btnVerificarCruzadas').addEventListener('click', verificarGrelha);
+    document.getElementById('btnRevelarCruzadas').addEventListener('click', proporRevelacao);
+    
+    document.getElementById('btnVoltarCruzadas').addEventListener('click', () => {
+      guardarEstadoActual(); pararTemporizador(); irPara('ecraInicio');
+    });
+
+    document.getElementById('btnCancelarLimpar').onclick = () => fecharModal('modalLimpar');
+    document.getElementById('btnConfirmarLimpar').onclick = () => { ARMAZEM.limpar(); window.location.reload(); };
+    document.getElementById('btnLimparTopo').onclick = () => abrirModal('modalLimpar');
+    document.getElementById('btnGuardarTopo').onclick = () => { guardarEstadoActual(); lancarToast('Progresso guardado localmente.', 'sucesso'); };
+
+    document.getElementById('btnConclusaoNovo').onclick = () => { fecharModal('modalConclusao'); abrirDesafio(cur.temaIdx, cur.nivel); };
+    document.getElementById('btnConclusaoMenu').onclick = () => { fecharModal('modalConclusao'); irPara('ecraInicio'); };
+
+    const salvo = ARMAZEM.ler();
+    if(salvo) restaurarEstado(salvo);
+  }
+
+  function confirmarMudanca(onSim){
+    abrirModal('modalConfirmar');
+    document.getElementById('btnConfirmarSim').onclick = () => { fecharModal('modalConfirmar'); onSim(); };
+    document.getElementById('btnConfirmarNao').onclick = () => { fecharModal('modalConfirmar'); };
+  }
+
+  function abrirDesafio(temaIdx, nivel){
+    const tema = CX_TEMAS[temaIdx];
+    const listaPalavrasTema = DICIONARIO[tema.id][nivel] || [];
+    
+    if(listaPalavrasTema.length === 0) {
+      lancarToast('Não existem palavras configuradas para este nível.', 'erro');
+      return;
+    }
+
+    let dimensoes = MotorGrelhas.gerar(listaPalavrasTema, 6);
+    
+    if(!dimensoes) {
+      dimensoes = MotorGrelhas.gerar(listaPalavrasTema, 4);
+    }
+
+    if(!dimensoes) {
+      lancarToast('Erro ao intersetar a matriz. Tente de novo.', 'erro');
+      return;
+    }
+
+    cur = {
+      temaIdx, id: tema.id, nome: tema.nome, nivel,
+      size: dimensoes.size, nrows: dimensoes.nrows,
+      rows: dimensoes.rows, words: dimensoes.words
+    };
+
+    grelha = [];
+    for(let r=0; r<cur.nrows; r++){
+      grelha.push([]);
+      for(let c=0; c<cur.size; c++){
+        const isBloco = cur.rows[r][c] === '.';
+        grelha[r].push({ 
+          bloco: isBloco, 
+          resposta: isBloco ? '' : normalizarLetra(cur.rows[r][c]),
+          utilizador: '', 
+          num: 0 
+        });
+      }
+    }
+
+    let n = 1;
+    cur.words.forEach(w => {
+      if(grelha[w.r] && grelha[w.r][w.c] && !grelha[w.r][w.c].bloco && grelha[w.r][w.c].num === 0){
+        grelha[w.r][w.c].num = n++;
+      }
+    });
+
+    seleccao = null; direccao = 'H'; pausado = false; segundos = 0; revelado = false; finalizado = false;
+    document.getElementById('cruzadasSubtitulo').textContent = `${tema.nome} · Nível ${cur.nivel.toUpperCase()}`;
+    const selo = document.getElementById('seloTemaActivo');
+    selo.textContent = tema.icone; selo.style.background = tema.cor;
+    
+    irPara('ecraCruzadas'); renderizarTabuleiro(); iniciarTemporizador();
+  }
+
+  function restaurarEstado(s){
+    cur = s.cur; grelha = s.grelha; seleccao = s.seleccao; direccao = s.direccao;
+    segundos = s.segundos; revelado = s.revelado; finalizado = s.finalizado; pausado = false;
+    document.getElementById('selectNivelCruzadas').value = cur.nivel;
+    document.getElementById('cruzadasSubtitulo').textContent = `${cur.nome} · Nível ${cur.nivel.toUpperCase()}`;
+    const tema = CX_TEMAS[cur.temaIdx];
+    const selo = document.getElementById('seloTemaActivo');
+    selo.textContent = tema.icone; selo.style.background = tema.cor;
+    
+    irPara('ecraCruzadas'); renderizarTabuleiro();
+    if(revelado || finalizado) bloquearGrelhaCompleta(); else iniciarTemporizador();
+  }
+
+  function guardarEstadoActual(){ if(cur && grelha) ARMAZEM.guardar({ cur, grelha, seleccao, direccao, segundos, revelado, finalizado }); }
+
+  function renderizarTabuleiro(){
+    const area = document.getElementById('areaCruzadas');
+    area.innerHTML = `
+      <div class="cx-barra-progresso-wrap"><div class="cx-barra-progresso-fill" id="cxBarraFill"></div></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div class="f-corpo" style="display:flex; gap:16px; font-size:14px; color:var(--tinta-suave);">
+          <span>⏱️ <b id="cxTimer">00:00</b></span>
+          <span>✓ <b id="cxFeitas">0</b>/<b id="cxTotal">0</b> palavras</span>
+        </div>
+        <button class="btn btn-fantasma" id="btnPausaCruzadas">⏸️ Pausa</button>
+      </div>
+      <div class="cx-layout">
+        <div class="cx-tabuleiro-wrap">
+          <div class="cx-tabuleiro" id="cxTabuleiro">
+            <div class="cx-grelha" id="cxGrelha"></div>
+            <div class="cx-pausa-cobertura" id="cxPausaCobertura">
+              <div style="font-size:32px;">⏸️</div><div class="f-display" style="font-size:16px;">Grelha Ocultada</div>
+              <button class="btn btn-primario" id="btnContinuarCruzadas">▶️ Retomar</button>
+            </div>
+          </div>
+        </div>
+        <div class="cx-pistas">
+          <div class="cx-grupo-pistas"><div class="cx-grupo-titulo">Horizontais</div><div id="cxPistasH"></div></div>
+          <div class="cx-grupo-pistas"><div class="cx-grupo-titulo">Verticais</div><div id="cxPistasV"></div></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btnPausaCruzadas').onclick = alternarPausa;
+    document.getElementById('btnContinuarCruzadas').onclick = alternarPausa;
+
+    const elG = document.getElementById('cxGrelha');
+    elG.style.gridTemplateColumns = `repeat(${cur.size}, 1fr)`;
+    elG.innerHTML = '';
+
+    for(let r=0; r<cur.nrows; r++){
+      for(let c=0; c<cur.size; c++){
+        const cel = grelha[r][c];
+        const div = document.createElement('div');
+        div.className = 'cx-celula' + (cel.bloco ? ' bloco' : '');
+        div.dataset.r = r; div.dataset.c = c;
+
+        if(!cel.bloco){
+          if(cel.num > 0){
+            const sp = document.createElement('span'); sp.className = 'num'; sp.textContent = cel.num;
+            div.appendChild(sp);
+          }
+          const inp = document.createElement('input');
+          inp.type = 'text'; inp.maxLength = 1; inp.value = cel.utilizador;
+          inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false');
+          
+          inp.addEventListener('focus', () => estabelecerFoco(r, c));
+          inp.addEventListener('keydown', e => tratarTeclado(e, r, c));
+          inp.addEventListener('beforeinput', e => tratarAntesDeInserir(e, r, c));
+          inp.addEventListener('input', e => tratarInsercao(e, r, c));
+          inp.addEventListener('click', () => tratarClique(r, c));
+
+          div.appendChild(inp);
+        }
+        elG.appendChild(div);
+      }
+    }
+    actualizarPistasLayout(); actualizarMetricas(); renderTemporizador();
+  }
+
+  function obterDiv(r, c){ return document.querySelector(`.cx-celula[data-r="${r}"][data-c="${c}"]`); }
+  function obterInput(r, c){ const d = obterDiv(r, c); return d ? d.querySelector('input') : null; }
+  function obterCelulasDaPalavra(w){ const o = []; for(let i=0; i<w.w.length; i++) o.push(w.d === 'H' ? [w.r, w.c + i] : [w.r + i, w.c]); return o; }
+  function obterPalavraNaPosicao(r, c, dir){ return cur.words.find(w => w.d === dir && obterCelulasDaPalavra(w).some(([rr, cc]) => rr === r && cc === c)); }
+  function estaCompletada(w){ return obterCelulasDaPalavra(w).every(([r, c]) => grelha[r][c].utilizador === grelha[r][c].resposta); }
+
+  function realcarInterface(){
+    document.querySelectorAll('.cx-celula').forEach(el => el.classList.remove('letra-activa', 'palavra-activa'));
+    if(!seleccao) return;
+    const [r, c] = seleccao; const w = obterPalavraNaPosicao(r, c, direccao);
+    if(w){ obterCelulasDaPalavra(w).forEach(([rr, cc]) => { const d = obterDiv(rr, cc); if(d) d.classList.add('palavra-activa'); }); }
+    const d = obterDiv(r, c); if(d) d.classList.add('letra-activa');
+    
+    document.querySelectorAll('.cx-pista').forEach(p => p.classList.remove('activa'));
+    if(w){ const elP = document.querySelector(`.cx-pista[data-key="${w.r},${w.c},${w.d}"]`); if(elP){ elP.classList.add('activa'); elP.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } }
+  }
+
+  function estabelecerFoco(r, c){
+    if(pausado || revelado || finalizado) return;
+    if(!seleccao || seleccao[0] !== r || seleccao[1] !== c){
+      if(!obterPalavraNaPosicao(r, c, direccao)) direccao = (direccao === 'H') ? 'V' : 'H';
+      seleccao = [r, c]; realcarInterface();
+    }
+  }
+
+  function tratarClique(r, c){
+    if(pausado || revelado || finalizado) return;
+    if(seleccao && seleccao[0] === r && seleccao[1] === c){
+      const outraDir = (direccao === 'H') ? 'V' : 'H'; if(obterPalavraNaPosicao(r, c, outraDir)) direccao = outraDir;
+    }
+    seleccao = [r, c]; realcarInterface();
+  }
+
+  function obterCelulaVizinha(r, c, dir, sentido){
+    let rr = r, cc = c;
+    while(true){
+      if(dir === 'H') cc += sentido; else rr += sentido;
+      if(rr < 0 || cc < 0 || rr >= cur.nrows || cc >= cur.size) return null;
+      if(!grelha[rr][cc].bloco) return [rr, cc]; 
+    }
+  }
+
+  function avancarCursor(r, c){
+    const prox = obterCelulaVizinha(r, c, direccao, 1);
+    if(prox){ seleccao = prox; realcarInterface(); const inp = obterInput(prox[0], prox[1]); if(inp) inp.focus(); }
+  }
+
+  function recuarCursor(r, c){
+    const ant = obterCelulaVizinha(r, c, direccao, -1);
+    if(ant){ seleccao = ant; realcarInterface(); const inp = obterInput(ant[0], ant[1]); if(inp) inp.focus(); }
+  }
+
+  function tratarAntesDeInserir(e, r, c){
+    if(pausado || revelado || finalizado) return;
+    if(e.isComposing) return; const txt = e.data; if(!txt) return;
+    const novaLetra = normalizarLetra(txt.slice(-1)); if(!novaLetra) return;
+    if(grelha[r][c].utilizador === novaLetra){ e.preventDefault(); avancarCursor(r, c); }
+  }
+
+  function tratarInsercao(e, r, c){
+    if(pausado || revelado || finalizado){ e.target.value = grelha[r][c].utilizador; return; }
+    const letra = normalizarLetra(e.target.value.slice(-1));
+    e.target.value = letra; grelha[r][c].utilizador = letra;
+    sincronizarConformidadePistas(); actualizarMetricas(); verificarFimDeJogo();
+    if(letra && !finalizado) avancarCursor(r, c);
+  }
+
+  function tratarTeclado(e, r, c){
+    if(pausado || revelado || finalizado){ e.preventDefault(); return; }
+    if(e.key === 'Backspace'){
+      e.preventDefault();
+      if(grelha[r][c].utilizador !== ''){
+        grelha[r][c].utilizador = ''; const inp = obterInput(r, c); if(inp) inp.value = '';
+        sincronizarConformidadePistas(); actualizarMetricas();
+      } else {
+        recuarCursor(r, c);
+        if(seleccao){
+          grelha[seleccao[0]][seleccao[1]].utilizador = ''; const inp = obterInput(seleccao[0], seleccao[1]); if(inp) inp.value = '';
+          sincronizarConformidadePistas(); actualizarMetricas();
+        }
+      }
+      return;
+    }
+    if(e.key === 'ArrowRight'){ e.preventDefault(); direccao = 'H'; avancarCursor(r, c); }
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); direccao = 'H'; recuarCursor(r, c); }
+    if(e.key === 'ArrowDown'){ e.preventDefault(); direccao = 'V'; avancarCursor(r, c); }
+    if(e.key === 'ArrowUp'){ e.preventDefault(); direccao = 'V'; recuarCursor(r, c); }
+  }
+
+  function actualizarPistasLayout(){
+    const elH = document.getElementById('cxPistasH'), elV = document.getElementById('cxPistasV');
+    elH.innerHTML = ''; elV.innerHTML = '';
+    const ordenadas = [];
+    cur.words.forEach(w => { const num = grelha[w.r][w.c].num; if(num > 0) ordenadas.push({ w, num }); });
+    ordenadas.sort((a, b) => a.num - b.num);
+
+    ordenadas.forEach(({ w, num }) => {
+      const div = document.createElement('div');
+      div.className = 'cx-pista' + (estaCompletada(w) ? ' feita' : '');
+      div.dataset.key = `${w.r},${w.c},${w.d}`;
+      div.innerHTML = `<span class="num">${num}.</span><span>${w.q} <i style="font-size:11px; opacity:0.75;">(${w.w.length} let.)</i></span>`;
+      div.onclick = () => {
+        if(revelado || finalizado) return;
+        seleccao = [w.r, w.c]; direccao = w.d; realcarInterface();
+        const inp = obterInput(w.r, w.c); if(inp) inp.focus();
+      };
+      if(w.d === 'H') elH.appendChild(div); else elV.appendChild(div);
+    });
+  }
+
+  function sincronizarConformidadePistas(){
+    cur.words.forEach(w => { const el = document.querySelector(`.cx-pista[data-key="${w.r},${w.c},${w.d}"]`); if(el) el.classList.toggle('feita', estaCompletada(w)); });
+  }
+
+  function actualizarMetricas(){
+    if(!cur) return;
+    const completas = cur.words.filter(estaCompletada).length;
+    document.getElementById('cxFeitas').textContent = completas;
+    document.getElementById('cxTotal').textContent = cur.words.length;
+    document.getElementById('cxBarraFill').style.width = (completas / cur.words.length * 100) + '%';
+  }
+
+  function verificarFimDeJogo(){
+    if(!cur || revelado || finalizado) return;
+    if(!cur.words.every(estaCompletada)) return;
+    finalizado = true; pararTemporizador(); bloquearGrelhaCompleta();
+    const m = Math.floor(segundos / 60), s = segundos % 60;
+    document.getElementById('textoConclusao').textContent = `Desafio superado com sucesso em ${m}m e ${s}s.`;
+    abrirModal('modalConclusao'); guardarEstadoActual();
+  }
+
+  function verificarGrelha(){
+    if(!cur || finalizado || revelado) return;
+    let certas = 0, erradas = 0;
+    for(let r=0; r<cur.nrows; r++){
+      for(let c=0; c<cur.size; c++){
+        const cel = grelha[r][c]; if(cel.bloco || !cel.utilizador) continue;
+        const div = obterDiv(r, c);
+        if(cel.utilizador === cel.resposta){ certas++; div.classList.add('certo'); } else { erradas++; div.classList.add('errado'); }
+      }
+    }
+    if(!certas && !erradas){ lancarToast('Preencha letras antes de validar.', 'erro'); return; }
+    lancarToast(erradas === 0 ? `Excelente! ${certas} corretas.` : `${certas} corretas e ${erradas} incorretas.`, erradas > 0 ? 'erro' : 'sucesso');
+    setTimeout(() => { document.querySelectorAll('.cx-celula').forEach(el => el.classList.remove('certo', 'errado')); realcarInterface(); }, 2000);
+  }
+
+  function proporRevelacao(){
+    if(!cur || finalizado || revelado) return;
+    abrirModal('modalRevelar');
+    document.getElementById('btnConfirmarRevelar').onclick = () => {
+      fecharModal('modalRevelar'); revelado = true; pararTemporizador();
+      for(let r=0; r<cur.nrows; r++){
+        for(let c=0; c<cur.size; c++){
+          if(!grelha[r][c].bloco){ grelha[r][c].utilizador = grelha[r][c].resposta; const inp = obterInput(r, c); if(inp) inp.value = grelha[r][c].resposta; }
+        }
+      }
+      bloquearGrelhaCompleta(); actualizarPistasLayout(); actualizarMetricas(); guardarEstadoActual();
+    };
+    document.getElementById('btnCancelarRevelar').onclick = () => fecharModal('modalRevelar');
+  }
+
+  function bloquearGrelhaCompleta(){
+    document.querySelectorAll('.cx-celula input').forEach(inp => { inp.readOnly = true; inp.tabIndex = -1; });
+    seleccao = null; realcarInterface();
+  }
+
+  function alternarPausa(){
+    if(!cur || revelado || finalizado) return;
+    pausado = !pausado;
+    if(pausado) pararTemporizador(); else iniciarTemporizador();
+    document.getElementById('cxPausaCobertura').classList.toggle('aberta', pausado);
+    document.getElementById('btnPausaCruzadas').textContent = pausado ? '▶️ Retomar' : '⏸️ Pausa';
+  }
+
+  function iniciarTemporizador(){ pararTemporizador(); if(!pausado && !revelado && !finalizado) temporizador = setInterval(() => { segundos++; renderTemporizador(); }, 1000); }
+  function pararTemporizador(){ if(temporizador) clearInterval(temporizador); temporizador = null; }
+  function renderTemporizador(){ const el = document.getElementById('cxTimer'); if(el) el.textContent = String(Math.floor(segundos/60)).padStart(2,'0')+':'+String(segundos%60).padStart(2,'0'); }
+
+  return { inicializar };
+})();
+
+function irPara(id){ document.querySelectorAll('.ecra').forEach(e => e.classList.remove('activo')); const el = document.getElementById(id); if(el) el.classList.add('activo'); }
+function abrirModal(id){ const m = document.getElementById(id); if(m) m.classList.add('aberto'); }
+function fecharModal(id){ const m = document.getElementById(id); if(m) m.classList.remove('aberto'); }
+function lancarToast(msg, tipo){
+  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'mostrar' + (tipo ? ' '+tipo : '');
+  setTimeout(() => t.classList.remove('mostrar'), 3000);
+}
+function normalizarLetra(c){ return (c||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z]/g,''); }
+
+document.addEventListener('DOMContentLoaded', () => { CruzadasUI.inicializar(); document.getElementById('botaoMarca').onclick = () => irPara('ecraInicio'); });
+</script>
+</body>
+</html>
