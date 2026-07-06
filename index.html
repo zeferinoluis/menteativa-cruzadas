@@ -440,7 +440,7 @@ const DICIONARIO = {
       { w: "CRUZEIRO", q: "Viagem turistica realizada a bordo de um grande navio" },
       { w: "POUSADA", q: "Estabelecimento de alojamento tipico ou regional" },
       { w: "ESTACAO", q: "Local de paragem e embarque de comboios ou autocarros" },
-      { w: "CONVENCAO", q: "Reuniao ou assembleia internacional de cariz profissional" },
+      { w: "CONVENCÃO", q: "Reuniao ou assembleia internacional de cariz profissional" },
       { w: "EMBARQUE", q: "Ato de entrar numa aeronave ou navio para viajar" },
       { w: "MONUMENTO", q: "Obra ou edificio de grande valor historico ou arquitetonico" },
       { w: "MEMORIAS", q: "Recordacoes ou registos de experiencias vividas num local" }
@@ -697,7 +697,12 @@ const CruzadasUI = (function(){
       grelha.push([]);
       for(let c=0; c<cur.size; c++){
         const isBloco = cur.rows[r][c] === '.';
-        grelha[r].push({ bloco: isBloco, resposta: isBloco ? '' : cur.rows[r][c], utilizador: '', num: 0 });
+        grelha[r].push({ 
+  bloco: isBloco, 
+  resposta: isBloco ? '' : normalizarLetra(cur.rows[r][c]), // <--- Normaliza a resposta aqui!
+  utilizador: '', 
+  num: 0 
+});
       }
     }
 
